@@ -35,6 +35,13 @@ import {
   DescriptionListGroup,
   DescriptionListTerm,
   DescriptionListDescription,
+  Modal,
+  ModalVariant,
+  Form,
+  FormGroup,
+  TextInput,
+  FormSelect,
+  FormSelectOption,
 } from '@patternfly/react-core'
 import {
   CaretDownIcon,
@@ -121,6 +128,11 @@ interface Fleet {
   name: string
   description: string
   deviceCount: number
+  deviceSpecs: {
+    cpu: number // cores
+    memory: number // GB
+    storage: number // GB
+  }
   models: ModelInfo[]
 }
 
@@ -150,12 +162,42 @@ interface ModelMonitoringInfo extends ModelInfo {
   }
 }
 
+interface AvailableModel {
+  id: string
+  name: string
+  version: string
+  type: string
+  description: string
+  publishedBy: string
+  publishDate: string
+  modelSize: string
+  requirements: {
+    minCpu: string
+    minMemory: string
+    minStorage: string
+  }
+  deploymentStatus: {
+    [fleetId: string]: {
+      status: 'deployed' | 'deploying' | 'failed' | 'not-deployed'
+      deployedVersion?: string
+      lastDeployed?: string
+      deviceCount?: number
+    }
+  }
+  compatibleFleets: string[]
+}
+
 const mockFleets: Fleet[] = [
   {
     id: 'edge-retail',
     name: 'Retail Edge Fleet',
     description: 'Point-of-sale and inventory management devices',
     deviceCount: 45,
+    deviceSpecs: {
+      cpu: 2, // 2 cores
+      memory: 4, // 4GB RAM
+      storage: 2 // 2GB storage
+    },
     models: [
       {
         id: 'prod-classifier-v2',
@@ -188,6 +230,11 @@ const mockFleets: Fleet[] = [
     name: 'Manufacturing IoT Fleet',
     description: 'Factory floor sensors and quality control systems',
     deviceCount: 128,
+    deviceSpecs: {
+      cpu: 4, // 4 cores
+      memory: 8, // 8GB RAM
+      storage: 4 // 4GB storage
+    },
     models: [
       {
         id: 'anomaly-detector-v3',
@@ -232,6 +279,11 @@ const mockFleets: Fleet[] = [
     name: 'Autonomous Vehicle Fleet',
     description: 'Self-driving cars and delivery robots',
     deviceCount: 23,
+    deviceSpecs: {
+      cpu: 8, // 8 cores (high performance for real-time processing)
+      memory: 16, // 16GB RAM
+      storage: 8 // 8GB storage
+    },
     models: [
       {
         id: 'object-detection-v4',
@@ -399,10 +451,170 @@ const mockMonitoringFleets: { [key: string]: ModelMonitoringInfo[] } = {
   ]
 }
 
+const mockAvailableModels: AvailableModel[] = [
+  {
+    id: 'sentiment-analyzer-v3',
+    name: 'Sentiment Analyzer',
+    version: 'v3.2.1',
+    type: 'NLP Classification',
+    description: 'Advanced sentiment analysis for customer feedback and social media monitoring',
+    publishedBy: 'Sarah Chen (AI Engineer)',
+    publishDate: '2025-01-10',
+    modelSize: '120MB',
+    requirements: {
+      minCpu: '2 cores',
+      minMemory: '4GB',
+      minStorage: '500MB'
+    },
+    deploymentStatus: {
+      'edge-retail': {
+        status: 'not-deployed'
+      },
+      'manufacturing-iot': {
+        status: 'deployed',
+        deployedVersion: 'v3.1.0',
+        lastDeployed: '2025-01-08',
+        deviceCount: 45
+      },
+      'autonomous-vehicles': {
+        status: 'not-deployed'
+      }
+    },
+    compatibleFleets: ['edge-retail', 'manufacturing-iot']
+  },
+  {
+    id: 'fraud-detector-v2',
+    name: 'Fraud Detection Model',
+    version: 'v2.4.3',
+    type: 'Anomaly Detection',
+    description: 'Real-time fraud detection for payment processing and transaction monitoring',
+    publishedBy: 'Michael Rodriguez (AI Engineer)',
+    publishDate: '2025-01-12',
+    modelSize: '95MB',
+    requirements: {
+      minCpu: '1.5 cores',
+      minMemory: '3GB',
+      minStorage: '400MB'
+    },
+    deploymentStatus: {
+      'edge-retail': {
+        status: 'deploying',
+        deployedVersion: 'v2.3.1',
+        lastDeployed: '2025-01-12',
+        deviceCount: 12
+      },
+      'manufacturing-iot': {
+        status: 'not-deployed'
+      },
+      'autonomous-vehicles': {
+        status: 'not-deployed'
+      }
+    },
+    compatibleFleets: ['edge-retail']
+  },
+  {
+    id: 'predictive-maintenance-v4',
+    name: 'Predictive Maintenance AI',
+    version: 'v4.1.0',
+    type: 'Time Series Forecasting',
+    description: 'Advanced predictive maintenance for industrial equipment and machinery',
+    publishedBy: 'David Kim (AI Engineer)',
+    publishDate: '2025-01-15',
+    modelSize: '180MB',
+    requirements: {
+      minCpu: '3 cores',
+      minMemory: '6GB',
+      minStorage: '800MB'
+    },
+    deploymentStatus: {
+      'edge-retail': {
+        status: 'not-deployed'
+      },
+      'manufacturing-iot': {
+        status: 'deployed',
+        deployedVersion: 'v4.1.0',
+        lastDeployed: '2025-01-15',
+        deviceCount: 85
+      },
+      'autonomous-vehicles': {
+        status: 'failed',
+        deployedVersion: 'v4.0.2',
+        lastDeployed: '2025-01-14',
+        deviceCount: 0
+      }
+    },
+    compatibleFleets: ['manufacturing-iot', 'autonomous-vehicles']
+  },
+  {
+    id: 'traffic-optimizer-v1',
+    name: 'Traffic Flow Optimizer',
+    version: 'v1.3.0',
+    type: 'Reinforcement Learning',
+    description: 'Intelligent traffic flow optimization for autonomous vehicle navigation',
+    publishedBy: 'Lisa Wang (AI Engineer)',
+    publishDate: '2025-01-16',
+    modelSize: '220MB',
+    requirements: {
+      minCpu: '4 cores',
+      minMemory: '8GB',
+      minStorage: '1GB'
+    },
+    deploymentStatus: {
+      'edge-retail': {
+        status: 'not-deployed'
+      },
+      'manufacturing-iot': {
+        status: 'not-deployed'
+      },
+      'autonomous-vehicles': {
+        status: 'deployed',
+        deployedVersion: 'v1.3.0',
+        lastDeployed: '2025-01-16',
+        deviceCount: 18
+      }
+    },
+    compatibleFleets: ['autonomous-vehicles']
+  },
+  {
+    id: 'quality-assurance-v5',
+    name: 'Visual Quality Assurance',
+    version: 'v5.0.1',
+    type: 'Computer Vision',
+    description: 'Advanced visual quality control for manufacturing and product inspection',
+    publishedBy: 'Jennifer Park (AI Engineer)',
+    publishDate: '2025-01-18',
+    modelSize: '340MB',
+    requirements: {
+      minCpu: '4 cores',
+      minMemory: '10GB',
+      minStorage: '1.5GB'
+    },
+    deploymentStatus: {
+      'edge-retail': {
+        status: 'deployed',
+        deployedVersion: 'v4.8.2',
+        lastDeployed: '2025-01-10',
+        deviceCount: 22
+      },
+      'manufacturing-iot': {
+        status: 'not-deployed'
+      },
+      'autonomous-vehicles': {
+        status: 'not-deployed'
+      }
+    },
+    compatibleFleets: ['edge-retail', 'manufacturing-iot']
+  }
+]
+
 const App: React.FC = () => {
   const [activeItem, setActiveItem] = React.useState<string>('dashboard')
   const [selectedRole, setSelectedRole] = React.useState<Role>('data-scientist')
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = React.useState(false)
+  const [isDeployModalOpen, setIsDeployModalOpen] = React.useState(false)
+  const [selectedModelForDeployment, setSelectedModelForDeployment] = React.useState<AvailableModel | null>(null)
+  const [selectedFleet, setSelectedFleet] = React.useState<string>('')
+  const [deploymentName, setDeploymentName] = React.useState<string>('')
   
   const currentRole = roles.find(role => role.id === selectedRole)!
   
@@ -412,6 +624,54 @@ const App: React.FC = () => {
       setActiveItem('dashboard')
     }
   }, [activeItem])
+
+  // Helper function to parse requirement strings (e.g., "4GB" -> 4)
+  const parseRequirement = (requirement: string): number => {
+    const match = requirement.match(/(\d+(?:\.\d+)?)/);
+    return match ? parseFloat(match[1]) : 0;
+  }
+
+  // Check if a model is compatible with a fleet based on device specs
+  const isModelCompatibleWithFleet = (model: AvailableModel, fleet: Fleet): boolean => {
+    const requiredCpu = parseRequirement(model.requirements.minCpu);
+    const requiredMemory = parseRequirement(model.requirements.minMemory);
+    const requiredStorage = parseRequirement(model.requirements.minStorage);
+    
+    return (
+      fleet.deviceSpecs.cpu >= requiredCpu &&
+      fleet.deviceSpecs.memory >= requiredMemory &&
+      fleet.deviceSpecs.storage >= requiredStorage
+    );
+  }
+
+  // Handle opening deployment modal
+  const handleDeployModel = (model: AvailableModel) => {
+    setSelectedModelForDeployment(model);
+    setSelectedFleet('');
+    setDeploymentName(`${model.name} - ${new Date().toLocaleDateString()}`);
+    setIsDeployModalOpen(true);
+  }
+
+  // Handle deployment submission
+  const handleDeploymentSubmit = () => {
+    if (selectedModelForDeployment && selectedFleet && deploymentName.trim()) {
+      // In a real app, this would make an API call to deploy the model
+      console.log('Deploying model:', {
+        model: selectedModelForDeployment.name,
+        fleet: selectedFleet,
+        deploymentName: deploymentName.trim()
+      });
+      
+      // Close modal and reset state
+      setIsDeployModalOpen(false);
+      setSelectedModelForDeployment(null);
+      setSelectedFleet('');
+      setDeploymentName('');
+      
+      // Navigate to Model Deployments tab
+      setActiveItem('deployments');
+    }
+  }
 
   const getNavigationGroups = () => {
     const roleConfigs = {
@@ -436,6 +696,7 @@ const App: React.FC = () => {
       'site-engineer': {
         title: 'Site Reliability',
         items: [
+          { id: 'available-models', label: 'Available Models', icon: <RepositoryIcon /> },
           { id: 'edge-devices', label: 'Edge Devices', icon: <CubeIcon /> },
           { id: 'deployments', label: 'Model Deployments', icon: <ServerIcon /> },
           { id: 'device-health', label: 'Device Health', icon: <HeartIcon /> },
@@ -1110,6 +1371,86 @@ const App: React.FC = () => {
         )
       },
       'site-engineer': {
+        'available-models': (
+          <PageSection>
+            <p style={{ marginBottom: '24px', color: 'var(--pf-v6-global--Color--200)' }}>
+              Deploy AI Engineer published models to your managed fleets. Monitor deployment status and manage model versions.
+            </p>
+            
+            <Gallery hasGutter minWidths={{ default: '400px' }}>
+              {mockAvailableModels.map((model) => (
+                <GalleryItem key={model.id}>
+                  <Card style={{ height: '100%' }}>
+                    <CardHeader>
+                      <Split hasGutter>
+                        <SplitItem isFilled>
+                          <Title headingLevel="h3" size="md">
+                            {model.name}
+                          </Title>
+                        </SplitItem>
+                        <SplitItem>
+                          <Label color="blue">{model.version}</Label>
+                        </SplitItem>
+                      </Split>
+                      <p style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', margin: 0 }}>
+                        {model.type} • {model.modelSize} • Published {model.publishDate}
+                      </p>
+                      <p style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--300)', margin: '4px 0 0 0' }}>
+                        by {model.publishedBy}
+                      </p>
+                    </CardHeader>
+                    
+                    <CardBody>
+                      <p style={{ fontSize: '14px', marginBottom: '16px' }}>
+                        {model.description}
+                      </p>
+                      
+                      {/* System Requirements */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <Title headingLevel="h5" size="sm" style={{ marginBottom: '8px' }}>
+                          System Requirements
+                        </Title>
+                        <DescriptionList isCompact isHorizontal>
+                          <DescriptionListGroup>
+                            <DescriptionListTerm>CPU</DescriptionListTerm>
+                            <DescriptionListDescription>{model.requirements.minCpu}</DescriptionListDescription>
+                          </DescriptionListGroup>
+                          <DescriptionListGroup>
+                            <DescriptionListTerm>Memory</DescriptionListTerm>
+                            <DescriptionListDescription>{model.requirements.minMemory}</DescriptionListDescription>
+                          </DescriptionListGroup>
+                          <DescriptionListGroup>
+                            <DescriptionListTerm>Storage</DescriptionListTerm>
+                            <DescriptionListDescription>{model.requirements.minStorage}</DescriptionListDescription>
+                          </DescriptionListGroup>
+                        </DescriptionList>
+                      </div>
+                      
+                      <div style={{ marginTop: '16px' }}>
+                        <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                          <FlexItem>
+                            <Button 
+                              variant="primary" 
+                              size="sm" 
+                              onClick={() => handleDeployModel(model)}
+                            >
+                              Deploy to Fleet
+                            </Button>
+                          </FlexItem>
+                          <FlexItem>
+                            <Button variant="link" size="sm">
+                              View Details
+                            </Button>
+                          </FlexItem>
+                        </Flex>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+              ))}
+            </Gallery>
+          </PageSection>
+        ),
         'edge-devices': (
           <PageSection>
             <Card>
@@ -1275,13 +1616,154 @@ const App: React.FC = () => {
   }
 
   return (
-    <Page 
-      masthead={masthead} 
-      sidebar={sidebar}
-      isManagedSidebar
-    >
-      {renderContent()}
-    </Page>
+    <>
+      <Page 
+        masthead={masthead} 
+        sidebar={sidebar}
+        isManagedSidebar
+      >
+        {renderContent()}
+      </Page>
+      
+      {/* Deployment Modal */}
+      <Modal
+        variant={ModalVariant.large}
+        title="Deploy Model to Fleet"
+        isOpen={isDeployModalOpen}
+        onClose={() => setIsDeployModalOpen(false)}
+        actions={[
+          <Button
+            key="cancel"
+            variant="link"
+            onClick={() => setIsDeployModalOpen(false)}
+          >
+            Cancel
+          </Button>,
+          <Button
+            key="confirm"
+            variant="primary"
+            onClick={handleDeploymentSubmit}
+            isDisabled={!selectedFleet || !deploymentName.trim()}
+          >
+            Deploy Model to Fleet
+          </Button>
+        ]}
+      >
+        {selectedModelForDeployment && (
+          <div style={{ padding: '24px' }}>
+            <Form>
+            <FormGroup label="Model Information" fieldId="model-info" style={{ marginBottom: '24px' }}>
+              <div style={{ 
+                padding: '20px', 
+                backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
+                borderRadius: '6px'
+              }}>
+                <Title headingLevel="h4" size="md" style={{ margin: 0, marginBottom: '12px' }}>
+                  {selectedModelForDeployment.name}
+                </Title>
+                <div style={{ marginBottom: '12px', fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                  {selectedModelForDeployment.type} • {selectedModelForDeployment.version} • {selectedModelForDeployment.modelSize}
+                </div>
+                <div style={{ marginBottom: '16px', fontSize: '14px', lineHeight: '1.5' }}>
+                  {selectedModelForDeployment.description}
+                </div>
+                <div style={{ fontSize: '13px' }}>
+                  <strong>System Requirements:</strong> {selectedModelForDeployment.requirements.minCpu} CPU, {selectedModelForDeployment.requirements.minMemory} RAM, {selectedModelForDeployment.requirements.minStorage} storage
+                </div>
+              </div>
+            </FormGroup>
+          
+            <FormGroup 
+              label="Target Fleet" 
+              fieldId="fleet-select" 
+              isRequired
+              helperText="Select the fleet where you want to deploy this model. Incompatible fleets are disabled based on device specifications."
+              style={{ marginBottom: '24px' }}
+            >
+              <FormSelect
+                value={selectedFleet}
+                onChange={(event, value) => setSelectedFleet(value)}
+                id="fleet-select"
+                name="fleet-select"
+              >
+                <FormSelectOption value="" label="Select a fleet..." />
+                {mockFleets.map((fleet) => {
+                  const isCompatible = selectedModelForDeployment && isModelCompatibleWithFleet(selectedModelForDeployment, fleet);
+                  return (
+                    <FormSelectOption
+                      key={fleet.id}
+                      value={fleet.id}
+                      label={`${fleet.name} (${fleet.deviceCount} devices)${!isCompatible ? ' - ⚠️ Insufficient Resources' : ''}`}
+                      isDisabled={!isCompatible}
+                    />
+                  );
+                })}
+              </FormSelect>
+              {selectedFleet && (
+                <div style={{ 
+                  marginTop: '16px',
+                  padding: '16px', 
+                  backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
+                  borderRadius: '6px',
+                  border: '1px solid var(--pf-v6-global--BorderColor--200)',
+                  fontSize: '14px'
+                }}>
+                  {(() => {
+                    const fleet = mockFleets.find(f => f.id === selectedFleet);
+                    return fleet ? (
+                      <div>
+                        <div style={{ fontWeight: '600', marginBottom: '8px', fontSize: '15px' }}>
+                          📊 {fleet.name}
+                        </div>
+                        <div style={{ marginBottom: '12px', color: 'var(--pf-v6-global--Color--200)', fontSize: '13px' }}>
+                          {fleet.description}
+                        </div>
+                        <div style={{ fontSize: '13px' }}>
+                          <strong>Device Specifications:</strong> {fleet.deviceSpecs.cpu} cores CPU, {fleet.deviceSpecs.memory}GB RAM, {fleet.deviceSpecs.storage}GB storage
+                        </div>
+                      </div>
+                    ) : null;
+                  })()}
+                </div>
+              )}
+            </FormGroup>
+          
+            <FormGroup 
+              label="Deployment Name" 
+              fieldId="deployment-name" 
+              isRequired
+              helperText="Give this deployment a unique name to identify it among multiple deployments of the same model."
+              style={{ marginBottom: '20px' }}
+            >
+              <TextInput
+                value={deploymentName}
+                onChange={(event, value) => setDeploymentName(value)}
+                id="deployment-name"
+                name="deployment-name"
+                placeholder="e.g., Sentiment Analyzer - Production East Coast"
+              />
+            </FormGroup>
+          
+            {selectedFleet && selectedModelForDeployment && (
+              <Alert 
+                variant="info" 
+                title="🚀 Deployment Summary"
+                style={{ marginTop: '20px', marginBottom: '16px' }}
+                isInline
+              >
+                <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                  <strong>{selectedModelForDeployment.name}</strong> ({selectedModelForDeployment.version}) will be deployed to all devices in the <strong>{mockFleets.find(f => f.id === selectedFleet)?.name}</strong> fleet.
+                  <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--pf-v6-global--Color--200)' }}>
+                    This deployment will affect <strong>{mockFleets.find(f => f.id === selectedFleet)?.deviceCount} devices</strong> and may take a few minutes to complete.
+                  </div>
+                </div>
+              </Alert>
+            )}
+          </Form>
+          </div>
+        )}
+      </Modal>
+    </>
   )
 }
 
