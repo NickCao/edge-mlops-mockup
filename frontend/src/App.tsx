@@ -718,6 +718,8 @@ const App: React.FC = () => {
   const [selectedModelForDeployment, setSelectedModelForDeployment] = React.useState<AvailableModel | null>(null)
   const [selectedFleet, setSelectedFleet] = React.useState<string>('')
   const [deploymentName, setDeploymentName] = React.useState<string>('')
+  const [selectedDeployment, setSelectedDeployment] = React.useState<ModelDeployment | null>(null)
+  const [showDeploymentDetail, setShowDeploymentDetail] = React.useState(false)
   
   const currentRole = roles.find(role => role.id === selectedRole)!
   
@@ -776,45 +778,57 @@ const App: React.FC = () => {
     }
   }
 
+  // Handle viewing deployment details
+  const handleViewDeploymentDetails = (deployment: ModelDeployment) => {
+    setSelectedDeployment(deployment);
+    setShowDeploymentDetail(true);
+  }
+
+  // Handle going back to deployments list
+  const handleBackToDeployments = () => {
+    setShowDeploymentDetail(false);
+    setSelectedDeployment(null);
+  }
+
+  // Generate mock performance data for deployment details
+  const generateDeploymentPerformanceData = (baseLatency: number, baseCpu: number, baseMemory: number) => {
+    const data = []
+    const now = Date.now()
+    
+    for (let i = 23; i >= 0; i--) {
+      const timestamp = now - (i * 60 * 60 * 1000) // Every hour for 24 hours
+      data.push({
+        timestamp,
+        cpuUsage: Math.max(0, Math.min(100, baseCpu + (Math.random() - 0.5) * 20)),
+        memoryUsage: Math.max(0, Math.min(100, baseMemory + (Math.random() - 0.5) * 15)),
+        latency: Math.max(1, baseLatency + (Math.random() - 0.5) * 10),
+        throughput: Math.max(0, 50 + (Math.random() - 0.5) * 30),
+        errorRate: Math.max(0, Math.min(10, 2 + (Math.random() - 0.5) * 3))
+      })
+    }
+    return data
+  }
+
   const getNavigationGroups = () => {
     const roleConfigs = {
       'data-scientist': {
         title: 'Data Science',
-        items: [
-          { id: 'experiments', label: 'Experiments', icon: <FlaskIcon /> },
-          { id: 'datasets', label: 'Datasets', icon: <DatabaseIcon /> },
-          { id: 'training-jobs', label: 'Training Jobs', icon: <PlayIcon /> },
-          { id: 'notebooks', label: 'Notebooks', icon: <BookIcon /> }
-        ]
+        items: []
       },
       'ai-engineer': {
         title: 'AI Engineering',
-        items: [
-          { id: 'model-registry', label: 'Model Registry', icon: <RepositoryIcon /> },
-          { id: 'deployments', label: 'Deployments', icon: <CloudIcon /> },
-          { id: 'monitoring', label: 'Monitoring', icon: <MonitoringIcon /> },
-          { id: 'pipelines', label: 'ML Pipelines', icon: <TopologyIcon /> }
-        ]
+        items: []
       },
       'site-engineer': {
         title: 'Site Reliability',
         items: [
           { id: 'available-models', label: 'Available Models', icon: <RepositoryIcon /> },
-          { id: 'edge-devices', label: 'Edge Devices', icon: <CubeIcon /> },
-          { id: 'deployments', label: 'Model Deployments', icon: <ServerIcon /> },
-          { id: 'device-health', label: 'Device Health', icon: <HeartIcon /> },
-          { id: 'fleet-management', label: 'Fleet Management', icon: <UsersIcon /> }
+          { id: 'deployments', label: 'Model Deployments', icon: <ServerIcon /> }
         ]
       },
       'developer': {
         title: 'API Development',
-        items: [
-          { id: 'model-catalog', label: 'Overview', icon: <ChartBarIcon /> },
-          { id: 'api-explorer', label: 'API Explorer', icon: <ExternalLinkAltIcon /> },
-          { id: 'documentation', label: 'API Documentation', icon: <FileIcon /> },
-          { id: 'api-keys', label: 'API Keys', icon: <KeyIcon /> },
-          { id: 'usage-analytics', label: 'Usage Analytics', icon: <RepositoryIcon /> }
-        ]
+        items: []
       }
     }
     
@@ -834,20 +848,22 @@ const App: React.FC = () => {
           Dashboard
         </NavItem>
         
-        {/* Role-specific navigation group */}
-        <NavGroup title={getNavigationGroups().title}>
-          {getNavigationGroups().items.map(item => (
-            <NavItem 
-              key={item.id}
-              itemId={item.id} 
-              isActive={activeItem === item.id}
-              icon={item.icon}
-              onClick={() => setActiveItem(item.id)}
-            >
-              {item.label}
-            </NavItem>
-          ))}
-        </NavGroup>
+        {/* Role-specific navigation group - only show if there are items */}
+        {getNavigationGroups().items.length > 0 && (
+          <NavGroup title={getNavigationGroups().title}>
+            {getNavigationGroups().items.map(item => (
+              <NavItem 
+                key={item.id}
+                itemId={item.id} 
+                isActive={activeItem === item.id}
+                icon={item.icon}
+                onClick={() => setActiveItem(item.id)}
+              >
+                {item.label}
+              </NavItem>
+            ))}
+          </NavGroup>
+        )}
         
         {/* Settings - Always visible */}
         <NavItem 
@@ -1378,100 +1394,10 @@ const App: React.FC = () => {
     // Role-specific content for non-dashboard items
     const contentMap = {
       'data-scientist': {
-        'experiments': (
-          <PageSection>
-            <Card>
-              <CardTitle>ML Experiments</CardTitle>
-              <CardBody>
-                <p>Manage your machine learning experiments, track metrics, and compare results.</p>
-                <Flex>
-                  <FlexItem><Button variant="primary">New Experiment</Button></FlexItem>
-                  <FlexItem><Button variant="secondary">Compare Results</Button></FlexItem>
-                  <FlexItem><Button variant="link">View History</Button></FlexItem>
-                </Flex>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'datasets': (
-          <PageSection>
-            <Card>
-              <CardTitle>Dataset Management</CardTitle>
-              <CardBody>
-                <p>Access and manage your training datasets.</p>
-                <Button variant="primary">Upload Dataset</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'training-jobs': (
-          <PageSection>
-            <Card>
-              <CardTitle>Training Jobs</CardTitle>
-              <CardBody>
-                <p>Monitor and manage your model training jobs.</p>
-                <Button variant="primary">Start Training</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'notebooks': (
-          <PageSection>
-            <Card>
-              <CardTitle>Jupyter Notebooks</CardTitle>
-              <CardBody>
-                <p>Access your development notebooks and create new ones.</p>
-                <Button variant="primary">Launch Notebook</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        )
+        // Only dashboard is implemented for data scientist
       },
       'ai-engineer': {
-        'model-registry': (
-          <PageSection>
-            <Card>
-              <CardTitle>Model Registry</CardTitle>
-              <CardBody>
-                <p>Browse and manage registered ML models.</p>
-                <Button variant="primary">Register Model</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'deployments': (
-          <PageSection>
-            <Card>
-              <CardTitle>Model Deployments</CardTitle>
-              <CardBody>
-                <p>Deploy and manage models in different environments.</p>
-                <Button variant="primary">Deploy Model</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'monitoring': (
-          <PageSection>
-            <Card>
-              <CardTitle>Model Monitoring</CardTitle>
-              <CardBody>
-                <p>Monitor model performance and data drift.</p>
-                <Button variant="primary">View Metrics</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'pipelines': (
-          <PageSection>
-            <Card>
-              <CardTitle>ML Pipelines</CardTitle>
-              <CardBody>
-                <p>Create and manage automated ML workflows.</p>
-                <Button variant="primary">Create Pipeline</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        )
+        // Only dashboard is implemented for ai engineer
       },
       'site-engineer': {
         'available-models': (
@@ -1554,214 +1480,366 @@ const App: React.FC = () => {
             </Gallery>
           </PageSection>
         ),
-        'edge-devices': (
-          <PageSection>
-            <Card>
-              <CardTitle>Edge Device Management</CardTitle>
-              <CardBody>
-                <p>Monitor and manage edge computing devices.</p>
-                <Button variant="primary">Add Device</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
         'deployments': (
           <PageSection>
-            <div style={{ marginBottom: '24px' }}>
-              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
-                Model Deployments
-              </Title>
-              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
-                Monitor and manage all model deployments across your managed fleets.
-              </p>
-            </div>
-            
-            <Card>
-              <CardBody>
-                <Table aria-label="Model Deployments Table" variant="compact">
-                  <Thead>
-                    <Tr>
-                      <Th width={25}>Deployment Name</Th>
-                      <Th width={20}>Model</Th>
-                      <Th width={20}>Fleet</Th>
-                      <Th width={15}>Status</Th>
-                      <Th width={10}>Devices</Th>
-                      <Th width={10}>Actions</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {mockDeployments.map((deployment) => (
-                      <Tr key={deployment.id}>
-                        <Td>
-                          <div>
-                            <div style={{ fontWeight: '600' }}>{deployment.deploymentName}</div>
-                            <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
-                              Deployed: {deployment.deployedDate}
-                            </div>
-                          </div>
-                        </Td>
-                        <Td>
-                          <div>
-                            <div>{deployment.modelName}</div>
-                            <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
-                              {deployment.modelVersion}
-                            </div>
-                          </div>
-                        </Td>
-                        <Td>
-                          <div>{deployment.fleetName}</div>
-                        </Td>
-                        <Td>
-                          <Label 
-                            color={
-                              deployment.status === 'active' ? 'green' :
-                              deployment.status === 'deploying' ? 'orange' :
-                              deployment.status === 'failed' ? 'red' :
-                              deployment.status === 'updating' ? 'blue' : 'grey'
-                            }
-                          >
-                            {deployment.status === 'active' ? 'Active' :
-                             deployment.status === 'deploying' ? 'Deploying' :
-                             deployment.status === 'failed' ? 'Failed' :
-                             deployment.status === 'updating' ? 'Updating' : 'Stopped'}
-                          </Label>
-                          <div style={{ fontSize: '11px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
-                            {deployment.successfulDevices}/{deployment.deviceCount} successful
-                          </div>
-                        </Td>
-                        <Td>
-                          <div style={{ fontSize: '14px' }}>
-                            {deployment.deviceCount}
-                          </div>
-                        </Td>
-                        <Td>
-                          <Button variant="secondary" size="sm">
-                            Details
-                          </Button>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
+            {!showDeploymentDetail ? (
+              // Deployments List View
+              <>
+                <div style={{ marginBottom: '24px' }}>
+                  <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                    Model Deployments
+                  </Title>
+                  <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                    Monitor and manage all model deployments across your managed fleets.
+                  </p>
+                </div>
                 
-                {mockDeployments.length === 0 && (
-                  <div style={{ textAlign: 'center', padding: '48px' }}>
-                    <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
-                      No deployments found. Deploy models from the Available Models tab.
-                    </p>
+                <Card>
+                  <CardBody>
+                    <Table aria-label="Model Deployments Table" variant="compact">
+                      <Thead>
+                        <Tr>
+                          <Th width={25}>Deployment Name</Th>
+                          <Th width={20}>Model</Th>
+                          <Th width={20}>Fleet</Th>
+                          <Th width={15}>Status</Th>
+                          <Th width={10}>Devices</Th>
+                          <Th width={10}>Actions</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {mockDeployments.map((deployment) => (
+                          <Tr key={deployment.id}>
+                            <Td>
+                              <div>
+                                <div style={{ fontWeight: '600' }}>{deployment.deploymentName}</div>
+                                <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                                  Deployed: {deployment.deployedDate}
+                                </div>
+                              </div>
+                            </Td>
+                            <Td>
+                              <div>
+                                <div>{deployment.modelName}</div>
+                                <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                                  {deployment.modelVersion}
+                                </div>
+                              </div>
+                            </Td>
+                            <Td>
+                              <div>{deployment.fleetName}</div>
+                            </Td>
+                            <Td>
+                              <Label 
+                                color={
+                                  deployment.status === 'active' ? 'green' :
+                                  deployment.status === 'deploying' ? 'orange' :
+                                  deployment.status === 'failed' ? 'red' :
+                                  deployment.status === 'updating' ? 'blue' : 'grey'
+                                }
+                              >
+                                {deployment.status === 'active' ? 'Active' :
+                                 deployment.status === 'deploying' ? 'Deploying' :
+                                 deployment.status === 'failed' ? 'Failed' :
+                                 deployment.status === 'updating' ? 'Updating' : 'Stopped'}
+                              </Label>
+                              <div style={{ fontSize: '11px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                                {deployment.successfulDevices}/{deployment.deviceCount} successful
+                              </div>
+                            </Td>
+                            <Td>
+                              <div style={{ fontSize: '14px' }}>
+                                {deployment.deviceCount}
+                              </div>
+                            </Td>
+                            <Td>
+                              <Button 
+                                variant="secondary" 
+                                size="sm"
+                                onClick={() => handleViewDeploymentDetails(deployment)}
+                              >
+                                Details
+                              </Button>
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                    
+                    {mockDeployments.length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '48px' }}>
+                        <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                          No deployments found. Deploy models from the Available Models tab.
+                        </p>
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
+              </>
+            ) : (
+              // Deployment Detail View
+              selectedDeployment && (
+                <>
+                  {/* Header with back button */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                      <Button variant="link" onClick={handleBackToDeployments} style={{ padding: '0', marginRight: '16px' }}>
+                        ← Back to Deployments
+                      </Button>
+                      <Title headingLevel="h1" size="2xl" style={{ margin: 0 }}>
+                        {selectedDeployment.deploymentName}
+                      </Title>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <Label 
+                        color={
+                          selectedDeployment.status === 'active' ? 'green' :
+                          selectedDeployment.status === 'deploying' ? 'orange' :
+                          selectedDeployment.status === 'failed' ? 'red' :
+                          selectedDeployment.status === 'updating' ? 'blue' : 'grey'
+                        }
+                      >
+                        {selectedDeployment.status === 'active' ? 'Active' :
+                         selectedDeployment.status === 'deploying' ? 'Deploying' :
+                         selectedDeployment.status === 'failed' ? 'Failed' :
+                         selectedDeployment.status === 'updating' ? 'Updating' : 'Stopped'}
+                      </Label>
+                      <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                        {selectedDeployment.modelName} {selectedDeployment.modelVersion} → {selectedDeployment.fleetName}
+                      </span>
+                    </div>
                   </div>
-                )}
-              </CardBody>
-            </Card>
+
+                  {/* Action Buttons */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                      <FlexItem>
+                        <Button variant="primary">
+                          Upgrade Deployment
+                        </Button>
+                      </FlexItem>
+                      <FlexItem>
+                        <Button variant="secondary">
+                          Edit Configuration
+                        </Button>
+                      </FlexItem>
+                      <FlexItem>
+                        <Button variant="danger">
+                          Stop Deployment
+                        </Button>
+                      </FlexItem>
+                    </Flex>
+                  </div>
+
+                  {/* Performance Overview Cards */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                      Performance Overview
+                    </Title>
+                    <Gallery hasGutter minWidths={{ default: '200px' }}>
+                      <GalleryItem>
+                        <Card>
+                          <CardBody>
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>
+                                {selectedDeployment.successfulDevices}/{selectedDeployment.deviceCount}
+                              </div>
+                              <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Successful Devices</div>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                      <GalleryItem>
+                        <Card>
+                          <CardBody>
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px', color: 'var(--pf-v6-global--palette--green--500)' }}>
+                                12ms
+                              </div>
+                              <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Avg Latency</div>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                      <GalleryItem>
+                        <Card>
+                          <CardBody>
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px', color: 'var(--pf-v6-global--palette--blue--500)' }}>
+                                97.2%
+                              </div>
+                              <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Uptime</div>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                      <GalleryItem>
+                        <Card>
+                          <CardBody>
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px', color: 'var(--pf-v6-global--palette--orange--500)' }}>
+                                0.3%
+                              </div>
+                              <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Error Rate</div>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                    </Gallery>
+                  </div>
+
+                  {/* Performance Charts */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                      Performance Metrics (24h)
+                    </Title>
+                    <Gallery hasGutter minWidths={{ default: '400px' }}>
+                      <GalleryItem>
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>CPU & Memory Usage</CardTitle>
+                          </CardHeader>
+                          <CardBody>
+                            <div style={{ height: '200px' }}>
+                              <VictoryChart
+                                padding={{ left: 50, top: 20, right: 20, bottom: 50 }}
+                                height={200}
+                                scale={{ x: 'time' }}
+                              >
+                                <VictoryAxis dependentAxis />
+                                <VictoryAxis />
+                                <VictoryArea
+                                  data={generateDeploymentPerformanceData(15, 65, 70)}
+                                  x="timestamp"
+                                  y="cpuUsage"
+                                  style={{ data: { fill: '#06c', fillOpacity: 0.3, stroke: '#06c', strokeWidth: 2 } }}
+                                />
+                                <VictoryArea
+                                  data={generateDeploymentPerformanceData(15, 65, 70)}
+                                  x="timestamp"
+                                  y="memoryUsage"
+                                  style={{ data: { fill: '#f0ab00', fillOpacity: 0.3, stroke: '#f0ab00', strokeWidth: 2 } }}
+                                />
+                              </VictoryChart>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                      <GalleryItem>
+                        <Card>
+                          <CardHeader>
+                            <CardTitle>Response Time & Throughput</CardTitle>
+                          </CardHeader>
+                          <CardBody>
+                            <div style={{ height: '200px' }}>
+                              <VictoryChart
+                                padding={{ left: 50, top: 20, right: 20, bottom: 50 }}
+                                height={200}
+                                scale={{ x: 'time' }}
+                              >
+                                <VictoryAxis dependentAxis />
+                                <VictoryAxis />
+                                <VictoryLine
+                                  data={generateDeploymentPerformanceData(15, 65, 70)}
+                                  x="timestamp"
+                                  y="latency"
+                                  style={{ data: { stroke: '#3e8635', strokeWidth: 3 } }}
+                                />
+                                <VictoryLine
+                                  data={generateDeploymentPerformanceData(15, 65, 70)}
+                                  x="timestamp"
+                                  y="throughput"
+                                  style={{ data: { stroke: '#8b43c7', strokeWidth: 3 } }}
+                                />
+                              </VictoryChart>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                    </Gallery>
+                  </div>
+
+                  {/* Device Health Status */}
+                  <div>
+                    <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                      Device Health Status
+                    </Title>
+                    <Card>
+                      <CardBody>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                          <div style={{ width: '120px', height: '120px' }}>
+                            <VictoryPie
+                              data={[
+                                { x: 'Healthy', y: selectedDeployment.successfulDevices },
+                                { x: 'Failed', y: selectedDeployment.failedDevices },
+                                { x: 'Warning', y: Math.max(0, selectedDeployment.deviceCount - selectedDeployment.successfulDevices - selectedDeployment.failedDevices) }
+                              ]}
+                              innerRadius={40}
+                              padAngle={3}
+                              colorScale={['#3e8635', '#c9190b', '#f0ab00']}
+                              width={120}
+                              height={120}
+                              padding={10}
+                              labelComponent={<></>}
+                              standalone={true}
+                            />
+                          </div>
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                              <div style={{ 
+                                width: '12px', 
+                                height: '12px', 
+                                backgroundColor: '#3e8635', 
+                                borderRadius: '50%',
+                                border: '2px solid #3e8635'
+                              }}></div>
+                              <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                                Healthy: <strong>{selectedDeployment.successfulDevices}</strong>
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                              <div style={{ 
+                                width: '12px', 
+                                height: '12px', 
+                                backgroundColor: '#c9190b', 
+                                borderRadius: '50%',
+                                border: '2px solid #c9190b'
+                              }}></div>
+                              <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                                Failed: <strong>{selectedDeployment.failedDevices}</strong>
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <div style={{ 
+                                width: '12px', 
+                                height: '12px', 
+                                backgroundColor: '#f0ab00', 
+                                borderRadius: '50%',
+                                border: '2px solid #f0ab00'
+                              }}></div>
+                              <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                                Warning: <strong>{Math.max(0, selectedDeployment.deviceCount - selectedDeployment.successfulDevices - selectedDeployment.failedDevices)}</strong>
+                              </span>
+                            </div>
+                            <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                              Total: {selectedDeployment.deviceCount} devices
+                            </div>
+                            <div style={{ marginTop: '4px', fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                              Last updated: {selectedDeployment.lastUpdated}
+                            </div>
+                          </div>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </div>
+                </>
+              )
+            )}
           </PageSection>
         ),
-        'device-health': (
-          <PageSection>
-            <Card>
-              <CardTitle>Device Health Monitoring</CardTitle>
-              <CardBody>
-                <p>Monitor the health and performance of edge devices.</p>
-                <Button variant="primary">Health Dashboard</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'fleet-management': (
-          <PageSection>
-            <Card>
-              <CardTitle>Fleet Management</CardTitle>
-              <CardBody>
-                <p>Manage large fleets of edge devices and their configurations.</p>
-                <Button variant="primary">Fleet Overview</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        )
       },
       'developer': {
-        'model-catalog': (
-          <PageSection>
-            <Title headingLevel="h2" size="xl" style={{ marginBottom: '24px' }}>
-              Model Overview
-            </Title>
-            <Gallery hasGutter>
-              <GalleryItem>
-                <Card>
-                  <CardTitle>Available Models</CardTitle>
-                  <CardBody>
-                    <p>Total models: <strong>{mockFleets.reduce((acc, fleet) => acc + fleet.models.length, 0)}</strong></p>
-                    <p>Active models: <strong>{mockFleets.reduce((acc, fleet) => acc + fleet.models.filter(m => m.status === 'active').length, 0)}</strong></p>
-                    <Button variant="primary" size="sm" onClick={() => setActiveItem('dashboard')}>View Full Catalog</Button>
-                  </CardBody>
-                </Card>
-              </GalleryItem>
-              <GalleryItem>
-                <Card>
-                  <CardTitle>API Usage</CardTitle>
-                  <CardBody>
-                    <p>API calls today: <strong>2,341</strong></p>
-                    <p>Success rate: <strong>99.7%</strong></p>
-                    <Button variant="secondary" size="sm" onClick={() => setActiveItem('usage-analytics')}>View Analytics</Button>
-                  </CardBody>
-                </Card>
-              </GalleryItem>
-              <GalleryItem>
-                <Card>
-                  <CardTitle>Fleet Status</CardTitle>
-                  <CardBody>
-                    <p>Total devices: <strong>{mockFleets.reduce((acc, fleet) => acc + fleet.deviceCount, 0)}</strong></p>
-                    <p>Active fleets: <strong>{mockFleets.length}</strong></p>
-                    <Button variant="tertiary" size="sm" onClick={() => setActiveItem('dashboard')}>View Fleet Models</Button>
-                  </CardBody>
-                </Card>
-              </GalleryItem>
-            </Gallery>
-          </PageSection>
-        ),
-        'api-explorer': (
-          <PageSection>
-            <Card>
-              <CardTitle>API Explorer</CardTitle>
-              <CardBody>
-                <p>Test and explore available ML model APIs.</p>
-                <Button variant="primary">Open Explorer</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'documentation': (
-          <PageSection>
-            <Card>
-              <CardTitle>API Documentation</CardTitle>
-              <CardBody>
-                <p>Browse comprehensive API documentation and examples.</p>
-                <Button variant="primary">View Docs</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'api-keys': (
-          <PageSection>
-            <Card>
-              <CardTitle>API Key Management</CardTitle>
-              <CardBody>
-                <p>Manage your API keys and access permissions.</p>
-                <Button variant="primary">Generate Key</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        ),
-        'usage-analytics': (
-          <PageSection>
-            <Card>
-              <CardTitle>Usage Analytics</CardTitle>
-              <CardBody>
-                <p>View detailed analytics of your API usage and performance.</p>
-                <Button variant="primary">View Analytics</Button>
-              </CardBody>
-            </Card>
-          </PageSection>
-        )
+        // Only dashboard is implemented for developer
       }
     }
     
