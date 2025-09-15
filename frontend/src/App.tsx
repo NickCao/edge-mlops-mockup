@@ -1631,40 +1631,23 @@ const App: React.FC = () => {
         title="Deploy Model to Fleet"
         isOpen={isDeployModalOpen}
         onClose={() => setIsDeployModalOpen(false)}
-        actions={[
-          <Button
-            key="cancel"
-            variant="link"
-            onClick={() => setIsDeployModalOpen(false)}
-          >
-            Cancel
-          </Button>,
-          <Button
-            key="confirm"
-            variant="primary"
-            onClick={handleDeploymentSubmit}
-            isDisabled={!selectedFleet || !deploymentName.trim()}
-          >
-            Deploy Model to Fleet
-          </Button>
-        ]}
       >
         {selectedModelForDeployment && (
           <div style={{ padding: '24px' }}>
             <Form>
-            <FormGroup label="Model Information" fieldId="model-info" style={{ marginBottom: '24px' }}>
+            <FormGroup label="Model Information" fieldId="model-info" style={{ marginBottom: '16px' }}>
               <div style={{ 
-                padding: '20px', 
+                padding: '16px', 
                 backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
-                borderRadius: '6px'
+                borderRadius: '4px'
               }}>
-                <Title headingLevel="h4" size="md" style={{ margin: 0, marginBottom: '12px' }}>
+                <Title headingLevel="h4" size="md" style={{ margin: 0, marginBottom: '8px' }}>
                   {selectedModelForDeployment.name}
                 </Title>
-                <div style={{ marginBottom: '12px', fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                <div style={{ marginBottom: '8px', fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
                   {selectedModelForDeployment.type} • {selectedModelForDeployment.version} • {selectedModelForDeployment.modelSize}
                 </div>
-                <div style={{ marginBottom: '16px', fontSize: '14px', lineHeight: '1.5' }}>
+                <div style={{ marginBottom: '12px', fontSize: '14px', lineHeight: '1.4' }}>
                   {selectedModelForDeployment.description}
                 </div>
                 <div style={{ fontSize: '13px' }}>
@@ -1678,7 +1661,7 @@ const App: React.FC = () => {
               fieldId="fleet-select" 
               isRequired
               helperText="Select the fleet where you want to deploy this model. Incompatible fleets are disabled based on device specifications."
-              style={{ marginBottom: '24px' }}
+              style={{ marginBottom: '16px' }}
             >
               <FormSelect
                 value={selectedFleet}
@@ -1701,10 +1684,10 @@ const App: React.FC = () => {
               </FormSelect>
               {selectedFleet && (
                 <div style={{ 
-                  marginTop: '16px',
-                  padding: '16px', 
+                  marginTop: '12px',
+                  padding: '12px', 
                   backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
-                  borderRadius: '6px',
+                  borderRadius: '4px',
                   border: '1px solid var(--pf-v6-global--BorderColor--200)',
                   fontSize: '14px'
                 }}>
@@ -1712,10 +1695,10 @@ const App: React.FC = () => {
                     const fleet = mockFleets.find(f => f.id === selectedFleet);
                     return fleet ? (
                       <div>
-                        <div style={{ fontWeight: '600', marginBottom: '8px', fontSize: '15px' }}>
+                        <div style={{ fontWeight: '600', marginBottom: '6px', fontSize: '15px' }}>
                           📊 {fleet.name}
                         </div>
-                        <div style={{ marginBottom: '12px', color: 'var(--pf-v6-global--Color--200)', fontSize: '13px' }}>
+                        <div style={{ marginBottom: '8px', color: 'var(--pf-v6-global--Color--200)', fontSize: '13px' }}>
                           {fleet.description}
                         </div>
                         <div style={{ fontSize: '13px' }}>
@@ -1733,7 +1716,7 @@ const App: React.FC = () => {
               fieldId="deployment-name" 
               isRequired
               helperText="Give this deployment a unique name to identify it among multiple deployments of the same model."
-              style={{ marginBottom: '20px' }}
+              style={{ marginBottom: '16px' }}
             >
               <TextInput
                 value={deploymentName}
@@ -1748,17 +1731,41 @@ const App: React.FC = () => {
               <Alert 
                 variant="info" 
                 title="🚀 Deployment Summary"
-                style={{ marginTop: '20px', marginBottom: '16px' }}
+                style={{ marginBottom: '16px' }}
                 isInline
               >
-                <div style={{ fontSize: '14px', lineHeight: '1.5' }}>
+                <div style={{ fontSize: '14px', lineHeight: '1.4' }}>
                   <strong>{selectedModelForDeployment.name}</strong> ({selectedModelForDeployment.version}) will be deployed to all devices in the <strong>{mockFleets.find(f => f.id === selectedFleet)?.name}</strong> fleet.
-                  <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--pf-v6-global--Color--200)' }}>
+                  <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--pf-v6-global--Color--200)' }}>
                     This deployment will affect <strong>{mockFleets.find(f => f.id === selectedFleet)?.deviceCount} devices</strong> and may take a few minutes to complete.
                   </div>
                 </div>
               </Alert>
             )}
+            
+            {/* Action Buttons */}
+            <div style={{ 
+              marginTop: '20px', 
+              paddingTop: '16px', 
+              borderTop: '1px solid var(--pf-v6-global--BorderColor--200)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
+              <Button
+                variant="link"
+                onClick={() => setIsDeployModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleDeploymentSubmit}
+                isDisabled={!selectedFleet || !deploymentName.trim()}
+              >
+                Deploy Model to Fleet
+              </Button>
+            </div>
           </Form>
           </div>
         )}
