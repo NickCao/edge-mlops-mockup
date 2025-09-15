@@ -367,7 +367,6 @@ const App: React.FC = () => {
           <DropdownItem
             key={role.id}
             onClick={() => {
-              console.log('Switching to role:', role.id);
               setSelectedRole(role.id);
               setActiveItem('dashboard');
             }}
