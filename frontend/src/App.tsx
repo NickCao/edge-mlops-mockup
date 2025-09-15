@@ -1,40 +1,40 @@
 import React from 'react'
-import {
-  Page,
-  Masthead,
-  MastheadMain,
-  MastheadContent,
-  Nav,
-  NavList,
-  NavItem,
-  NavGroup,
-  Card,
-  CardBody,
-  CardTitle,
-  CardHeader,
-  Gallery,
-  GalleryItem,
-  Button,
-  Alert,
-  Flex,
-  FlexItem,
-  PageSection,
-  Sidebar,
-  PageSidebar,
-  Dropdown,
-  DropdownList,
-  DropdownItem,
-  MenuToggle,
-  Title,
-  Divider,
-  Label,
-  Badge,
-  Split,
-  SplitItem,
-  DescriptionList,
-  DescriptionListGroup,
-  DescriptionListTerm,
-  DescriptionListDescription,
+import { 
+  Page, 
+  Masthead, 
+  MastheadMain, 
+  MastheadContent, 
+  Nav, 
+  NavList, 
+  NavItem, 
+  NavGroup, 
+  Card, 
+  CardBody, 
+  CardTitle, 
+  CardHeader, 
+  Gallery, 
+  GalleryItem, 
+  Button, 
+  Alert, 
+  Flex, 
+  FlexItem, 
+  PageSection, 
+  Sidebar, 
+  PageSidebar, 
+  Dropdown, 
+  DropdownList, 
+  DropdownItem, 
+  MenuToggle, 
+  Title, 
+  Divider, 
+  Label, 
+  Badge, 
+  Split, 
+  SplitItem, 
+  DescriptionList, 
+  DescriptionListGroup, 
+  DescriptionListTerm, 
+  DescriptionListDescription, 
   Modal,
   ModalVariant,
   Form,
@@ -43,6 +43,7 @@ import {
   FormSelect,
   FormSelectOption,
 } from '@patternfly/react-core'
+import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table'
 import {
   CaretDownIcon,
   UserIcon,
@@ -185,6 +186,21 @@ interface AvailableModel {
     }
   }
   compatibleFleets: string[]
+}
+
+interface ModelDeployment {
+  id: string
+  deploymentName: string
+  modelName: string
+  modelVersion: string
+  fleetName: string
+  fleetId: string
+  status: 'active' | 'deploying' | 'failed' | 'stopped' | 'updating'
+  deployedDate: string
+  deviceCount: number
+  successfulDevices: number
+  failedDevices: number
+  lastUpdated: string
 }
 
 const mockFleets: Fleet[] = [
@@ -604,6 +620,93 @@ const mockAvailableModels: AvailableModel[] = [
       }
     },
     compatibleFleets: ['edge-retail', 'manufacturing-iot']
+  }
+]
+
+const mockDeployments: ModelDeployment[] = [
+  {
+    id: 'deploy-001',
+    deploymentName: 'Sentiment Analyzer - Production',
+    modelName: 'Sentiment Analyzer',
+    modelVersion: 'v3.1.0',
+    fleetName: 'Manufacturing IoT Fleet',
+    fleetId: 'manufacturing-iot',
+    status: 'active',
+    deployedDate: '2025-01-08',
+    deviceCount: 45,
+    successfulDevices: 44,
+    failedDevices: 1,
+    lastUpdated: '2025-01-15 14:30:00'
+  },
+  {
+    id: 'deploy-002', 
+    deploymentName: 'Fraud Detector - East Coast',
+    modelName: 'Fraud Detection Model',
+    modelVersion: 'v2.3.1',
+    fleetName: 'Retail Edge Fleet',
+    fleetId: 'edge-retail',
+    status: 'deploying',
+    deployedDate: '2025-01-12',
+    deviceCount: 12,
+    successfulDevices: 8,
+    failedDevices: 0,
+    lastUpdated: '2025-01-15 15:45:00'
+  },
+  {
+    id: 'deploy-003',
+    deploymentName: 'Predictive Maintenance - Factory Floor',
+    modelName: 'Predictive Maintenance AI',
+    modelVersion: 'v4.1.0',
+    fleetName: 'Manufacturing IoT Fleet',
+    fleetId: 'manufacturing-iot',
+    status: 'active',
+    deployedDate: '2025-01-15',
+    deviceCount: 85,
+    successfulDevices: 85,
+    failedDevices: 0,
+    lastUpdated: '2025-01-15 16:00:00'
+  },
+  {
+    id: 'deploy-004',
+    deploymentName: 'Traffic Optimizer - Beta',
+    modelName: 'Traffic Flow Optimizer',
+    modelVersion: 'v1.3.0',
+    fleetName: 'Autonomous Vehicle Fleet',
+    fleetId: 'autonomous-vehicles',
+    status: 'active',
+    deployedDate: '2025-01-16',
+    deviceCount: 18,
+    successfulDevices: 18,
+    failedDevices: 0,
+    lastUpdated: '2025-01-16 09:15:00'
+  },
+  {
+    id: 'deploy-005',
+    deploymentName: 'Visual QA - Rollback Test',
+    modelName: 'Visual Quality Assurance',
+    modelVersion: 'v4.8.2',
+    fleetName: 'Retail Edge Fleet', 
+    fleetId: 'edge-retail',
+    status: 'failed',
+    deployedDate: '2025-01-10',
+    deviceCount: 22,
+    successfulDevices: 15,
+    failedDevices: 7,
+    lastUpdated: '2025-01-14 11:20:00'
+  },
+  {
+    id: 'deploy-006',
+    deploymentName: 'Predictive Maintenance - AV Test',
+    modelName: 'Predictive Maintenance AI',
+    modelVersion: 'v4.0.2',
+    fleetName: 'Autonomous Vehicle Fleet',
+    fleetId: 'autonomous-vehicles',
+    status: 'stopped',
+    deployedDate: '2025-01-14',
+    deviceCount: 5,
+    successfulDevices: 0,
+    failedDevices: 5,
+    lastUpdated: '2025-01-14 17:45:00'
   }
 ]
 
@@ -1464,11 +1567,90 @@ const App: React.FC = () => {
         ),
         'deployments': (
           <PageSection>
+            <div style={{ marginBottom: '24px' }}>
+              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                Model Deployments
+              </Title>
+              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                Monitor and manage all model deployments across your managed fleets.
+              </p>
+            </div>
+            
             <Card>
-              <CardTitle>Edge Deployments</CardTitle>
               <CardBody>
-                <p>Deploy models to edge devices and IoT systems.</p>
-                <Button variant="primary">Deploy to Edge</Button>
+                <Table aria-label="Model Deployments Table" variant="compact">
+                  <Thead>
+                    <Tr>
+                      <Th width={25}>Deployment Name</Th>
+                      <Th width={20}>Model</Th>
+                      <Th width={20}>Fleet</Th>
+                      <Th width={15}>Status</Th>
+                      <Th width={10}>Devices</Th>
+                      <Th width={10}>Actions</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {mockDeployments.map((deployment) => (
+                      <Tr key={deployment.id}>
+                        <Td>
+                          <div>
+                            <div style={{ fontWeight: '600' }}>{deployment.deploymentName}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                              Deployed: {deployment.deployedDate}
+                            </div>
+                          </div>
+                        </Td>
+                        <Td>
+                          <div>
+                            <div>{deployment.modelName}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                              {deployment.modelVersion}
+                            </div>
+                          </div>
+                        </Td>
+                        <Td>
+                          <div>{deployment.fleetName}</div>
+                        </Td>
+                        <Td>
+                          <Label 
+                            color={
+                              deployment.status === 'active' ? 'green' :
+                              deployment.status === 'deploying' ? 'orange' :
+                              deployment.status === 'failed' ? 'red' :
+                              deployment.status === 'updating' ? 'blue' : 'grey'
+                            }
+                          >
+                            {deployment.status === 'active' ? 'Active' :
+                             deployment.status === 'deploying' ? 'Deploying' :
+                             deployment.status === 'failed' ? 'Failed' :
+                             deployment.status === 'updating' ? 'Updating' : 'Stopped'}
+                          </Label>
+                          <div style={{ fontSize: '11px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                            {deployment.successfulDevices}/{deployment.deviceCount} successful
+                          </div>
+                        </Td>
+                        <Td>
+                          <div style={{ fontSize: '14px' }}>
+                            {deployment.deviceCount}
+                          </div>
+                        </Td>
+                        <Td>
+                          <Button variant="secondary" size="sm">
+                            Details
+                          </Button>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+                
+                {mockDeployments.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '48px' }}>
+                    <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                      No deployments found. Deploy models from the Available Models tab.
+                    </p>
+                  </div>
+                )}
               </CardBody>
             </Card>
           </PageSection>
