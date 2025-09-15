@@ -60,6 +60,7 @@ import {
   KeyIcon,
   ChartBarIcon,
 } from '@patternfly/react-icons'
+import { VictoryChart, VictoryLine, VictoryAxis, VictoryArea, VictoryBar, VictoryPie } from 'victory'
 
 type Role = 'data-scientist' | 'ai-engineer' | 'site-engineer' | 'developer'
 
@@ -121,6 +122,32 @@ interface Fleet {
   description: string
   deviceCount: number
   models: ModelInfo[]
+}
+
+interface PerformanceMetrics {
+  timestamp: number
+  cpuUsage: number
+  memoryUsage: number
+  latency: number
+  throughput: number
+  errorRate: number
+}
+
+interface ModelMonitoringInfo extends ModelInfo {
+  currentMetrics: {
+    cpuUsage: number
+    memoryUsage: number
+    avgLatency: number
+    throughput: number
+    errorRate: number
+    uptime: number
+  }
+  historicalData: PerformanceMetrics[]
+  deviceHealth: {
+    healthy: number
+    warning: number
+    error: number
+  }
 }
 
 const mockFleets: Fleet[] = [
@@ -232,6 +259,145 @@ const mockFleets: Fleet[] = [
     ]
   }
 ]
+
+// Generate mock historical data for the last 24 hours
+const generateHistoricalData = (baseLatency: number, baseCpu: number, baseMemory: number): PerformanceMetrics[] => {
+  const data: PerformanceMetrics[] = []
+  const now = Date.now()
+  
+  for (let i = 23; i >= 0; i--) {
+    const timestamp = now - (i * 60 * 60 * 1000) // Every hour
+    data.push({
+      timestamp,
+      cpuUsage: Math.max(0, Math.min(100, baseCpu + (Math.random() - 0.5) * 20)),
+      memoryUsage: Math.max(0, Math.min(100, baseMemory + (Math.random() - 0.5) * 15)),
+      latency: Math.max(1, baseLatency + (Math.random() - 0.5) * 10),
+      throughput: Math.max(0, 1000 + (Math.random() - 0.5) * 200),
+      errorRate: Math.max(0, Math.min(10, Math.random() * 2))
+    })
+  }
+  
+  return data
+}
+
+const mockMonitoringFleets: { [key: string]: ModelMonitoringInfo[] } = {
+  'edge-retail': [
+    {
+      id: 'prod-classifier-v2',
+      name: 'Product Classifier',
+      version: 'v2.1.3',
+      type: 'Classification',
+      parameters: '50M params',
+      apiUrl: 'http://localhost:8080/api/v1/classify',
+      status: 'active',
+      accuracy: '94.2%',
+      latency: '12ms',
+      description: 'Real-time product identification from camera feeds',
+      currentMetrics: {
+        cpuUsage: 67,
+        memoryUsage: 45,
+        avgLatency: 11.8,
+        throughput: 1250,
+        errorRate: 0.3,
+        uptime: 99.8
+      },
+      historicalData: generateHistoricalData(12, 67, 45),
+      deviceHealth: { healthy: 40, warning: 4, error: 1 }
+    },
+    {
+      id: 'inventory-pred-v1',
+      name: 'Inventory Predictor',
+      version: 'v1.2.0',
+      type: 'Regression',
+      parameters: '25M params',
+      apiUrl: 'http://localhost:8081/api/v1/predict',
+      status: 'active',
+      accuracy: '91.8%',
+      latency: '8ms',
+      description: 'Predict inventory demand based on historical data',
+      currentMetrics: {
+        cpuUsage: 34,
+        memoryUsage: 28,
+        avgLatency: 7.9,
+        throughput: 890,
+        errorRate: 0.1,
+        uptime: 99.9
+      },
+      historicalData: generateHistoricalData(8, 34, 28),
+      deviceHealth: { healthy: 43, warning: 2, error: 0 }
+    }
+  ],
+  'manufacturing-iot': [
+    {
+      id: 'anomaly-detector-v3',
+      name: 'Anomaly Detector',
+      version: 'v3.0.1',
+      type: 'Anomaly Detection',
+      parameters: '35M params',
+      apiUrl: 'http://localhost:8082/api/v1/detect',
+      status: 'active',
+      accuracy: '97.5%',
+      latency: '5ms',
+      description: 'Detect equipment anomalies from sensor data',
+      currentMetrics: {
+        cpuUsage: 78,
+        memoryUsage: 62,
+        avgLatency: 4.8,
+        throughput: 2100,
+        errorRate: 0.05,
+        uptime: 99.9
+      },
+      historicalData: generateHistoricalData(5, 78, 62),
+      deviceHealth: { healthy: 120, warning: 6, error: 2 }
+    },
+    {
+      id: 'quality-inspector-v2',
+      name: 'Quality Inspector',
+      version: 'v2.3.1',
+      type: 'Computer Vision',
+      parameters: '120M params',
+      apiUrl: 'http://localhost:8083/api/v1/inspect',
+      status: 'updating',
+      accuracy: '98.1%',
+      latency: '18ms',
+      description: 'Automated visual quality control inspection',
+      currentMetrics: {
+        cpuUsage: 45,
+        memoryUsage: 38,
+        avgLatency: 19.2,
+        throughput: 450,
+        errorRate: 0.8,
+        uptime: 97.2
+      },
+      historicalData: generateHistoricalData(18, 45, 38),
+      deviceHealth: { healthy: 115, warning: 10, error: 3 }
+    }
+  ],
+  'autonomous-vehicles': [
+    {
+      id: 'object-detection-v4',
+      name: 'Object Detection',
+      version: 'v4.1.0',
+      type: 'Computer Vision',
+      parameters: '200M params',
+      apiUrl: 'http://localhost:8085/api/v1/detect',
+      status: 'active',
+      accuracy: '96.8%',
+      latency: '15ms',
+      description: 'Real-time object detection for autonomous navigation',
+      currentMetrics: {
+        cpuUsage: 89,
+        memoryUsage: 76,
+        avgLatency: 14.5,
+        throughput: 720,
+        errorRate: 0.2,
+        uptime: 99.5
+      },
+      historicalData: generateHistoricalData(15, 89, 76),
+      deviceHealth: { healthy: 20, warning: 2, error: 1 }
+    }
+  ]
+}
 
 const App: React.FC = () => {
   const [activeItem, setActiveItem] = React.useState<string>('dashboard')
@@ -420,8 +586,6 @@ const App: React.FC = () => {
     const dashboards = {
       'data-scientist': (
         <PageSection>
-          <Alert variant="info" title={`Welcome, ${currentRole.name}!`} />
-          <br />
           <Gallery hasGutter>
             <GalleryItem>
               <Card>
@@ -458,8 +622,6 @@ const App: React.FC = () => {
       ),
       'ai-engineer': (
         <PageSection>
-          <Alert variant="info" title={`Welcome, ${currentRole.name}!`} />
-          <br />
           <Gallery hasGutter>
             <GalleryItem>
               <Card>
@@ -496,46 +658,228 @@ const App: React.FC = () => {
       ),
       'site-engineer': (
         <PageSection>
-          <Alert variant="info" title={`Welcome, ${currentRole.name}!`} />
-          <br />
-          <Gallery hasGutter>
-            <GalleryItem>
-              <Card>
-                <CardTitle>Edge Devices</CardTitle>
-                <CardBody>
-                  <p>Connected devices: <strong>128</strong></p>
-                  <p>Offline devices: <strong>3</strong></p>
-                  <Button variant="primary" size="sm">Manage Fleet</Button>
-                </CardBody>
-              </Card>
-            </GalleryItem>
-            <GalleryItem>
-              <Card>
-                <CardTitle>Model Deployments</CardTitle>
-                <CardBody>
-                  <p>Deployed models: <strong>15</strong></p>
-                  <p>Pending updates: <strong>4</strong></p>
-                  <Button variant="secondary" size="sm">Deploy Models</Button>
-                </CardBody>
-              </Card>
-            </GalleryItem>
-            <GalleryItem>
-              <Card>
-                <CardTitle>Device Health</CardTitle>
-                <CardBody>
-                  <p>Healthy: <strong>125</strong></p>
-                  <p>Alerts: <strong>3</strong></p>
-                  <Button variant="tertiary" size="sm">Health Check</Button>
-                </CardBody>
-              </Card>
-            </GalleryItem>
-          </Gallery>
+          <p style={{ marginBottom: '24px', color: 'var(--pf-v6-global--Color--200)' }}>
+            Real-time performance monitoring and resource usage for deployed models across edge device fleets.
+          </p>
+          
+          {mockFleets.map((fleet, fleetIndex) => (
+            <div key={fleet.id} style={{ marginBottom: '40px' }}>
+              <Split hasGutter style={{ marginBottom: '16px' }}>
+                <SplitItem isFilled>
+                  <Title headingLevel="h2" size="lg">
+                    {fleet.name}
+                  </Title>
+                </SplitItem>
+                <SplitItem>
+                  <Badge isRead>{fleet.deviceCount} devices</Badge>
+                </SplitItem>
+              </Split>
+              
+              <p style={{ color: 'var(--pf-v6-global--Color--200)', marginBottom: '16px', fontSize: '14px' }}>
+                {fleet.description}
+              </p>
+              
+              <Gallery hasGutter minWidths={{ default: '400px' }}>
+                {(mockMonitoringFleets[fleet.id] || []).map((model) => (
+                  <GalleryItem key={model.id}>
+                    <Card style={{ height: '100%' }}>
+                      <CardHeader>
+                        <Split hasGutter>
+                          <SplitItem isFilled>
+                            <Title headingLevel="h3" size="md">
+                              {model.name}
+                            </Title>
+                          </SplitItem>
+                          <SplitItem>
+                            <Label 
+                              color={
+                                model.status === 'active' ? 'green' : 
+                                model.status === 'updating' ? 'orange' : 'red'
+                              }
+                            >
+                              {model.status}
+                            </Label>
+                          </SplitItem>
+                        </Split>
+                        <p style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', margin: 0 }}>
+                          {model.version} • Uptime: {model.currentMetrics.uptime}%
+                        </p>
+                      </CardHeader>
+                      
+                      <CardBody>
+                        {/* Real-time Metrics */}
+                        <div style={{ marginBottom: '16px' }}>
+                          <DescriptionList isCompact isHorizontal>
+                            <DescriptionListGroup>
+                              <DescriptionListTerm>CPU</DescriptionListTerm>
+                              <DescriptionListDescription>
+                                <strong style={{ color: model.currentMetrics.cpuUsage > 80 ? '#c9190b' : model.currentMetrics.cpuUsage > 60 ? '#f0ab00' : '#3e8635' }}>
+                                  {model.currentMetrics.cpuUsage}%
+                                </strong>
+                              </DescriptionListDescription>
+                            </DescriptionListGroup>
+                            <DescriptionListGroup>
+                              <DescriptionListTerm>Memory</DescriptionListTerm>
+                              <DescriptionListDescription>
+                                <strong style={{ color: model.currentMetrics.memoryUsage > 80 ? '#c9190b' : model.currentMetrics.memoryUsage > 60 ? '#f0ab00' : '#3e8635' }}>
+                                  {model.currentMetrics.memoryUsage}%
+                                </strong>
+                              </DescriptionListDescription>
+                            </DescriptionListGroup>
+                            <DescriptionListGroup>
+                              <DescriptionListTerm>Latency</DescriptionListTerm>
+                              <DescriptionListDescription>
+                                <strong>{model.currentMetrics.avgLatency}ms</strong>
+                              </DescriptionListDescription>
+                            </DescriptionListGroup>
+                            <DescriptionListGroup>
+                              <DescriptionListTerm>Throughput</DescriptionListTerm>
+                              <DescriptionListDescription>
+                                <strong>{model.currentMetrics.throughput}/min</strong>
+                              </DescriptionListDescription>
+                            </DescriptionListGroup>
+                          </DescriptionList>
+                        </div>
+                        
+                        {/* Performance Chart */}
+                        <div style={{ marginBottom: '16px' }}>
+                          <Title headingLevel="h5" size="sm" style={{ marginBottom: '8px' }}>
+                            CPU & Memory Usage (24h)
+                          </Title>
+                          <div style={{ height: '120px' }}>
+                            <VictoryChart
+                              height={120}
+                              width={350}
+                              padding={{ left: 40, top: 10, right: 10, bottom: 30 }}
+                              scale={{ x: 'time' }}
+                            >
+                              <VictoryAxis dependentAxis
+                                tickFormat={(value) => `${value}%`}
+                                style={{ tickLabels: { fontSize: 10 } }}
+                              />
+                              <VictoryAxis
+                                tickFormat={() => ''}
+                                style={{ tickLabels: { fontSize: 10 } }}
+                              />
+                              <VictoryArea
+                                data={model.historicalData.map(d => ({ x: new Date(d.timestamp), y: d.cpuUsage }))}
+                                style={{ data: { fill: '#06c', fillOpacity: 0.3, stroke: '#06c', strokeWidth: 2 } }}
+                              />
+                              <VictoryArea
+                                data={model.historicalData.map(d => ({ x: new Date(d.timestamp), y: d.memoryUsage }))}
+                                style={{ data: { fill: '#3e8635', fillOpacity: 0.3, stroke: '#3e8635', strokeWidth: 2 } }}
+                              />
+                            </VictoryChart>
+                          </div>
+                        </div>
+                        
+                        {/* Device Health */}
+                        <div style={{ marginBottom: '16px' }}>
+                          <Title headingLevel="h5" size="sm" style={{ marginBottom: '8px' }}>
+                            Device Health
+                          </Title>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                            <div style={{ width: '100px', height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                              <VictoryPie
+                                data={[
+                                  { x: 'Healthy', y: model.deviceHealth.healthy },
+                                  { x: 'Warning', y: model.deviceHealth.warning },
+                                  { x: 'Error', y: model.deviceHealth.error }
+                                ]}
+                                innerRadius={30}
+                                padAngle={3}
+                                colorScale={['#3e8635', '#f0ab00', '#c9190b']}
+                                width={100}
+                                height={100}
+                                padding={10}
+                                labelComponent={<></>}
+                                standalone={true}
+                              />
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                <div style={{ 
+                                  width: '12px', 
+                                  height: '12px', 
+                                  backgroundColor: '#3e8635', 
+                                  borderRadius: '50%',
+                                  border: '2px solid #3e8635'
+                                }}></div>
+                                <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                                  Healthy: <strong>{model.deviceHealth.healthy}</strong>
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                                <div style={{ 
+                                  width: '12px', 
+                                  height: '12px', 
+                                  backgroundColor: '#f0ab00', 
+                                  borderRadius: '50%',
+                                  border: '2px solid #f0ab00'
+                                }}></div>
+                                <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                                  Warning: <strong>{model.deviceHealth.warning}</strong>
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ 
+                                  width: '12px', 
+                                  height: '12px', 
+                                  backgroundColor: '#c9190b', 
+                                  borderRadius: '50%',
+                                  border: '2px solid #c9190b'
+                                }}></div>
+                                <span style={{ fontSize: '14px', fontWeight: '500' }}>
+                                  Error: <strong>{model.deviceHealth.error}</strong>
+                                </span>
+                              </div>
+                              <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                                Total: {model.deviceHealth.healthy + model.deviceHealth.warning + model.deviceHealth.error} devices
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Error Rate */}
+                        <div style={{ marginBottom: '16px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '14px' }}>Error Rate:</span>
+                            <strong style={{ color: model.currentMetrics.errorRate > 1 ? '#c9190b' : '#3e8635' }}>
+                              {model.currentMetrics.errorRate}%
+                            </strong>
+                          </div>
+                        </div>
+                        
+                        <div style={{ marginTop: '16px' }}>
+                          <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                            <FlexItem>
+                              <Button variant="primary" size="sm">
+                                View Details
+                              </Button>
+                            </FlexItem>
+                            <FlexItem>
+                              <Button variant="secondary" size="sm">
+                                Restart Model
+                              </Button>
+                            </FlexItem>
+                          </Flex>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </GalleryItem>
+                ))}
+              </Gallery>
+              
+              {fleetIndex < mockFleets.length - 1 && (
+                <Divider style={{ marginTop: '32px' }} />
+              )}
+            </div>
+          ))}
         </PageSection>
       ),
       'developer': (
         <PageSection>
-          <Alert variant="info" title={`Welcome, ${currentRole.name}!`} />
-          <p style={{ marginTop: '16px', marginBottom: '24px', color: 'var(--pf-v6-global--Color--200)' }}>
+          <p style={{ marginBottom: '24px', color: 'var(--pf-v6-global--Color--200)' }}>
             Browse available models organized by device fleets. Each model provides a local API endpoint for integration.
           </p>
           
