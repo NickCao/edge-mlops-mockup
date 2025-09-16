@@ -17,10 +17,6 @@ A modern frontend application built with React, PatternFly design system, and Bu
 ## 🛠️ Installation
 
 1. **Clone and navigate to the project:**
-   ```bash
-   cd frontend
-   ```
-
 2. **Install dependencies:**
    ```bash
    bun install
@@ -45,7 +41,6 @@ bun run lint       # Type checking with TypeScript
 ## 🏗️ Project Structure
 
 ```
-frontend/
 ├── src/
 │   ├── App.tsx           # Main application component
 │   ├── main.tsx          # React entry point
