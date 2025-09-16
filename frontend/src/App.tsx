@@ -67,6 +67,7 @@ import {
   FileIcon,
   KeyIcon,
   ChartBarIcon,
+  ArrowLeftIcon,
 } from '@patternfly/react-icons'
 import { VictoryChart, VictoryLine, VictoryAxis, VictoryArea, VictoryBar, VictoryPie } from 'victory'
 
@@ -1429,6 +1430,8 @@ const App: React.FC = () => {
   const [selectedEvaluationModel, setSelectedEvaluationModel] = React.useState<{familyId: string, familyName: string, version: string, versionId: string} | null>(null)
   const [selectedEvaluationDataset, setSelectedEvaluationDataset] = React.useState<string>('')
   const [selectedEvaluationType, setSelectedEvaluationType] = React.useState<'accuracy' | 'bias' | 'fairness' | 'performance' | 'robustness'>('accuracy')
+  const [selectedEvaluationDetail, setSelectedEvaluationDetail] = React.useState<ModelEvaluation | null>(null)
+  const [showEvaluationDetail, setShowEvaluationDetail] = React.useState(false)
   
   const currentRole = roles.find(role => role.id === selectedRole)!
   
@@ -1562,6 +1565,16 @@ const App: React.FC = () => {
     // 1. Create a new evaluation record
     // 2. Start the evaluation job
     // 3. Update the evaluations list
+  }
+
+  const handleViewEvaluationDetails = (evaluation: ModelEvaluation) => {
+    setSelectedEvaluationDetail(evaluation)
+    setShowEvaluationDetail(true)
+  }
+
+  const handleBackToEvaluationsList = () => {
+    setShowEvaluationDetail(false)
+    setSelectedEvaluationDetail(null)
   }
 
   const toggleModelFamilyExpansion = (familyId: string) => {
@@ -2698,14 +2711,16 @@ const App: React.FC = () => {
         ),
         'evaluations': (
           <PageSection>
-            <div style={{ marginBottom: '24px' }}>
-              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
-                Model Evaluations
-              </Title>
-              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
-                Monitor and review all model evaluations including bias, fairness, accuracy, and robustness testing.
-              </p>
-            </div>
+            {!showEvaluationDetail ? (
+              <>
+                <div style={{ marginBottom: '24px' }}>
+                  <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                    Model Evaluations
+                  </Title>
+                  <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                    Monitor and review all model evaluations including bias, fairness, accuracy, and robustness testing.
+                  </p>
+                </div>
             
             <Card>
               <CardBody>
@@ -2806,7 +2821,11 @@ const App: React.FC = () => {
                             )}
                             {evaluation.status === 'completed' && (
                               <FlexItem>
-                                <Button variant="secondary" size="sm">
+                                <Button 
+                                  variant="secondary" 
+                                  size="sm"
+                                  onClick={() => handleViewEvaluationDetails(evaluation)}
+                                >
                                   View Details
                                 </Button>
                               </FlexItem>
@@ -2890,7 +2909,276 @@ const App: React.FC = () => {
                   </Card>
                 </GalleryItem>
               </Gallery>
-            </div>
+                </div>
+              </>
+            ) : (
+              selectedEvaluationDetail && (
+                <div>
+                  {/* Back Button */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <Button 
+                      variant="link" 
+                      onClick={handleBackToEvaluationsList}
+                      style={{ padding: 0, marginBottom: '16px' }}
+                    >
+                      <ArrowLeftIcon style={{ marginRight: '8px' }} />
+                      Back to Evaluations
+                    </Button>
+                    <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                      Evaluation Report: {selectedEvaluationDetail.modelName} {selectedEvaluationDetail.modelVersion}
+                    </Title>
+                    <div style={{ fontSize: '16px', color: 'var(--pf-v6-global--Color--200)', marginBottom: '4px' }}>
+                      {selectedEvaluationDetail.evaluationType.charAt(0).toUpperCase() + selectedEvaluationDetail.evaluationType.slice(1)} Evaluation
+                    </div>
+                    <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--300)' }}>
+                      Completed: {selectedEvaluationDetail.completedDate}
+                    </div>
+                  </div>
+
+                  {/* Overall Score Card */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <Gallery hasGutter>
+                      <GalleryItem>
+                        <Card>
+                          <CardHeader>
+                            <Title headingLevel="h3" size="lg">Overall Score</Title>
+                          </CardHeader>
+                          <CardBody>
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ 
+                                fontSize: '48px', 
+                                fontWeight: '700', 
+                                marginBottom: '8px',
+                                color: selectedEvaluationDetail.evaluationType === 'bias' ? 
+                                  (selectedEvaluationDetail.metrics.overall < 0.2 ? 'var(--pf-v6-global--palette--green--500)' : 
+                                   selectedEvaluationDetail.metrics.overall < 0.4 ? 'var(--pf-v6-global--palette--orange--500)' : 
+                                   'var(--pf-v6-global--palette--red--500)') :
+                                  (selectedEvaluationDetail.metrics.overall > 80 ? 'var(--pf-v6-global--palette--green--500)' : 
+                                   selectedEvaluationDetail.metrics.overall > 60 ? 'var(--pf-v6-global--palette--orange--500)' : 
+                                   'var(--pf-v6-global--palette--red--500)')
+                              }}>
+                                {selectedEvaluationDetail.evaluationType === 'bias' || selectedEvaluationDetail.evaluationType === 'fairness' ? 
+                                  selectedEvaluationDetail.metrics.overall.toFixed(2) : 
+                                  `${selectedEvaluationDetail.metrics.overall.toFixed(1)}%`}
+                              </div>
+                              <Label 
+                                size="lg"
+                                color={
+                                  selectedEvaluationDetail.evaluationType === 'bias' ? 
+                                    (selectedEvaluationDetail.metrics.overall < 0.2 ? 'green' : 
+                                     selectedEvaluationDetail.metrics.overall < 0.4 ? 'orange' : 'red') :
+                                    (selectedEvaluationDetail.metrics.overall > 80 ? 'green' : 
+                                     selectedEvaluationDetail.metrics.overall > 60 ? 'orange' : 'red')
+                                }
+                              >
+                                {selectedEvaluationDetail.evaluationType === 'bias' ? 
+                                  (selectedEvaluationDetail.metrics.overall < 0.2 ? 'Low Bias' : 
+                                   selectedEvaluationDetail.metrics.overall < 0.4 ? 'Medium Bias' : 'High Bias') :
+                                  selectedEvaluationDetail.evaluationType === 'fairness' ?
+                                    (selectedEvaluationDetail.metrics.overall > 0.8 ? 'Very Fair' :
+                                     selectedEvaluationDetail.metrics.overall > 0.6 ? 'Fair' : 'Needs Improvement') :
+                                    (selectedEvaluationDetail.metrics.overall > 80 ? 'Excellent' : 
+                                     selectedEvaluationDetail.metrics.overall > 60 ? 'Good' : 'Needs Improvement')
+                                }
+                              </Label>
+                            </div>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                      <GalleryItem>
+                        <Card>
+                          <CardHeader>
+                            <Title headingLevel="h3" size="lg">Evaluation Details</Title>
+                          </CardHeader>
+                          <CardBody>
+                            <DescriptionList isCompact>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Model</DescriptionListTerm>
+                                <DescriptionListDescription>{selectedEvaluationDetail.modelName}</DescriptionListDescription>
+                              </DescriptionListGroup>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Version</DescriptionListTerm>
+                                <DescriptionListDescription>{selectedEvaluationDetail.modelVersion}</DescriptionListDescription>
+                              </DescriptionListGroup>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Dataset</DescriptionListTerm>
+                                <DescriptionListDescription>{selectedEvaluationDetail.dataset}</DescriptionListDescription>
+                              </DescriptionListGroup>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Evaluation Type</DescriptionListTerm>
+                                <DescriptionListDescription>{selectedEvaluationDetail.evaluationType.charAt(0).toUpperCase() + selectedEvaluationDetail.evaluationType.slice(1)}</DescriptionListDescription>
+                              </DescriptionListGroup>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Started</DescriptionListTerm>
+                                <DescriptionListDescription>{selectedEvaluationDetail.startedDate}</DescriptionListDescription>
+                              </DescriptionListGroup>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Duration</DescriptionListTerm>
+                                <DescriptionListDescription>{selectedEvaluationDetail.duration}</DescriptionListDescription>
+                              </DescriptionListGroup>
+                            </DescriptionList>
+                          </CardBody>
+                        </Card>
+                      </GalleryItem>
+                    </Gallery>
+                  </div>
+
+                  {/* Detailed Metrics */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                      Detailed Metrics
+                    </Title>
+                    <Gallery hasGutter minWidths={{ default: '300px' }}>
+                      {Object.entries(selectedEvaluationDetail.metrics.detailed).map(([key, value]) => (
+                        <GalleryItem key={key}>
+                          <Card>
+                            <CardHeader>
+                              <Title headingLevel="h4" size="md">
+                                {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
+                              </Title>
+                            </CardHeader>
+                            <CardBody>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '28px', fontWeight: '600', marginBottom: '4px' }}>
+                                  {typeof value === 'number' ? 
+                                    (key === 'bias' || key === 'fairness' ? value.toFixed(2) : `${value.toFixed(1)}%`) : 
+                                    value}
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                                  {key === 'accuracy' ? 'Correct predictions' :
+                                   key === 'precision' ? 'True positives / All positives' :
+                                   key === 'recall' ? 'True positives / Actual positives' :
+                                   key === 'f1Score' ? 'Harmonic mean of precision & recall' :
+                                   key === 'bias' ? 'Lower is better' :
+                                   key === 'fairness' ? 'Higher is better' :
+                                   key === 'latency' ? 'Average response time' :
+                                   'Evaluation metric'}
+                                </div>
+                              </div>
+                            </CardBody>
+                          </Card>
+                        </GalleryItem>
+                      ))}
+                    </Gallery>
+                  </div>
+
+                  {/* Sample Results */}
+                  {selectedEvaluationDetail.sampleResults && (
+                    <div style={{ marginBottom: '32px' }}>
+                      <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                        Sample Results
+                      </Title>
+                      <Card>
+                        <CardBody>
+                          <Table aria-label="Sample Results Table" variant="compact">
+                            <Thead>
+                              <Tr>
+                                <Th width={20}>Input</Th>
+                                <Th width={20}>Expected Output</Th>
+                                <Th width={20}>Actual Output</Th>
+                                <Th width={15}>Confidence</Th>
+                                <Th width={15}>Result</Th>
+                                <Th width={10}>Status</Th>
+                              </Tr>
+                            </Thead>
+                            <Tbody>
+                              {selectedEvaluationDetail.sampleResults.map((result, index) => (
+                                <Tr key={index}>
+                                  <Td>
+                                    <div style={{ fontSize: '13px', maxWidth: '200px', wordBreak: 'break-word' }}>
+                                      {result.input.length > 100 ? `${result.input.substring(0, 100)}...` : result.input}
+                                    </div>
+                                  </Td>
+                                  <Td>
+                                    <div style={{ fontSize: '13px', fontWeight: '600' }}>{result.expected}</div>
+                                  </Td>
+                                  <Td>
+                                    <div style={{ fontSize: '13px', fontWeight: '600' }}>{result.actual}</div>
+                                  </Td>
+                                  <Td>
+                                    <div style={{ fontSize: '13px' }}>{(result.confidence * 100).toFixed(1)}%</div>
+                                  </Td>
+                                  <Td>
+                                    <div style={{ fontSize: '13px' }}>{result.score ? `${result.score.toFixed(2)}` : '-'}</div>
+                                  </Td>
+                                  <Td>
+                                    <Label 
+                                      color={result.correct ? 'green' : 'red'}
+                                      size="sm"
+                                    >
+                                      {result.correct ? 'Correct' : 'Incorrect'}
+                                    </Label>
+                                  </Td>
+                                </Tr>
+                              ))}
+                            </Tbody>
+                          </Table>
+                        </CardBody>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Recommendations */}
+                  {selectedEvaluationDetail.recommendations && selectedEvaluationDetail.recommendations.length > 0 && (
+                    <div style={{ marginBottom: '32px' }}>
+                      <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                        Recommendations
+                      </Title>
+                      <Card>
+                        <CardBody>
+                          {selectedEvaluationDetail.recommendations.map((rec, index) => (
+                            <Alert 
+                              key={index}
+                              variant={rec.priority === 'high' ? 'warning' : rec.priority === 'medium' ? 'info' : 'default'}
+                              title={rec.title}
+                              style={{ marginBottom: index < selectedEvaluationDetail.recommendations!.length - 1 ? '16px' : '0' }}
+                              isInline
+                            >
+                              <p style={{ marginBottom: '8px' }}>{rec.description}</p>
+                              {rec.actions && rec.actions.length > 0 && (
+                                <div>
+                                  <strong>Suggested Actions:</strong>
+                                  <ul style={{ marginTop: '4px', marginLeft: '16px' }}>
+                                    {rec.actions.map((action, actionIndex) => (
+                                      <li key={actionIndex} style={{ marginBottom: '2px' }}>{action}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </Alert>
+                          ))}
+                        </CardBody>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* Report Actions */}
+                  <div style={{ marginTop: '32px', marginBottom: '24px' }}>
+                    <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                      Actions
+                    </Title>
+                    <Flex spaceItems={{ default: 'spaceItemsLg' }}>
+                      <FlexItem>
+                        <Button variant="primary">
+                          <ExternalLinkAltIcon style={{ marginRight: '4px' }} />
+                          Download Full Report
+                        </Button>
+                      </FlexItem>
+                      <FlexItem>
+                        <Button variant="secondary">
+                          Export Results
+                        </Button>
+                      </FlexItem>
+                      <FlexItem>
+                        <Button variant="tertiary">
+                          Schedule Re-evaluation
+                        </Button>
+                      </FlexItem>
+                    </Flex>
+                  </div>
+                </div>
+              )
+            )}
           </PageSection>
         ),
         'datasets': (
