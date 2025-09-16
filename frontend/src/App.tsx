@@ -623,6 +623,424 @@ const mockAvailableModels: AvailableModel[] = [
   }
 ]
 
+// Mock data for AI Engineer - Models developed by Data Scientists with versioning
+interface ModelVersion {
+  id: string
+  version: string
+  createdDate: string
+  status: 'draft' | 'ready' | 'published' | 'deprecated' | 'unpublished'
+  accuracy?: string
+  modelSize: string
+  trainingDataset: string
+  lastEvaluated?: string
+  evaluations: {
+    accuracy: number
+    precision: number
+    recall: number
+    f1Score: number
+    bias: number
+    fairness: number
+    latency: number
+  }
+  artifacts: {
+    modelFile: string
+    configFile: string
+    requirementsFile: string
+  }
+  publishedDate?: string
+  unpublishedDate?: string
+}
+
+interface ModelFamily {
+  id: string
+  name: string
+  type: string
+  framework: string
+  description: string
+  developedBy: string
+  versions: ModelVersion[]
+  currentVersion?: string // latest/active version
+}
+
+interface ModelEvaluation {
+  id: string
+  modelId: string
+  modelName: string
+  modelVersion: string
+  evaluationType: 'accuracy' | 'bias' | 'fairness' | 'performance' | 'robustness'
+  status: 'running' | 'completed' | 'failed' | 'queued'
+  startedDate: string
+  completedDate?: string
+  executedBy: string
+  dataset: string
+  metrics: {
+    overall: number
+    detailed: Record<string, number>
+  }
+  report?: string
+}
+
+const mockModelFamilies: ModelFamily[] = [
+  {
+    id: 'sentiment-classifier',
+    name: 'Customer Sentiment Classifier',
+    type: 'Text Classification',
+    framework: 'PyTorch',
+    description: 'Advanced sentiment analysis model for customer reviews and feedback processing',
+    developedBy: 'Sarah Chen (Data Scientist)',
+    currentVersion: 'v2.1.3',
+    versions: [
+      {
+        id: 'sentiment-v2.1.3',
+        version: 'v2.1.3',
+        createdDate: '2025-01-10',
+        status: 'ready',
+        accuracy: '94.2%',
+        modelSize: '125MB',
+        trainingDataset: 'Customer Reviews Dataset v3',
+        lastEvaluated: '2025-01-15',
+        evaluations: {
+          accuracy: 94.2,
+          precision: 93.8,
+          recall: 94.5,
+          f1Score: 94.1,
+          bias: 0.15,
+          fairness: 0.82,
+          latency: 12.3
+        },
+        artifacts: {
+          modelFile: 'sentiment_classifier_v2.1.3.pth',
+          configFile: 'model_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      },
+      {
+        id: 'sentiment-v2.1.2',
+        version: 'v2.1.2',
+        createdDate: '2025-01-08',
+        status: 'published',
+        accuracy: '93.8%',
+        modelSize: '120MB',
+        trainingDataset: 'Customer Reviews Dataset v3',
+        lastEvaluated: '2025-01-12',
+        publishedDate: '2025-01-12',
+        evaluations: {
+          accuracy: 93.8,
+          precision: 93.2,
+          recall: 94.1,
+          f1Score: 93.6,
+          bias: 0.18,
+          fairness: 0.79,
+          latency: 11.8
+        },
+        artifacts: {
+          modelFile: 'sentiment_classifier_v2.1.2.pth',
+          configFile: 'model_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      },
+      {
+        id: 'sentiment-v2.1.1',
+        version: 'v2.1.1',
+        createdDate: '2025-01-05',
+        status: 'unpublished',
+        accuracy: '93.1%',
+        modelSize: '118MB',
+        trainingDataset: 'Customer Reviews Dataset v2',
+        lastEvaluated: '2025-01-10',
+        publishedDate: '2025-01-08',
+        unpublishedDate: '2025-01-12',
+        evaluations: {
+          accuracy: 93.1,
+          precision: 92.8,
+          recall: 93.4,
+          f1Score: 93.1,
+          bias: 0.21,
+          fairness: 0.75,
+          latency: 12.1
+        },
+        artifacts: {
+          modelFile: 'sentiment_classifier_v2.1.1.pth',
+          configFile: 'model_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      }
+    ]
+  },
+  {
+    id: 'fraud-detector',
+    name: 'Fraud Detection Neural Network',
+    type: 'Anomaly Detection',
+    framework: 'TensorFlow',
+    description: 'Deep learning model for real-time fraud detection in financial transactions',
+    developedBy: 'Michael Rodriguez (Data Scientist)',
+    currentVersion: 'v1.8.0',
+    versions: [
+      {
+        id: 'fraud-v1.8.0',
+        version: 'v1.8.0',
+        createdDate: '2025-01-08',
+        status: 'published',
+        accuracy: '97.8%',
+        modelSize: '89MB',
+        trainingDataset: 'Financial Transactions Dataset 2024',
+        lastEvaluated: '2025-01-14',
+        publishedDate: '2025-01-15',
+        evaluations: {
+          accuracy: 97.8,
+          precision: 97.2,
+          recall: 98.1,
+          f1Score: 97.6,
+          bias: 0.09,
+          fairness: 0.91,
+          latency: 8.7
+        },
+        artifacts: {
+          modelFile: 'fraud_detector_v1.8.0.h5',
+          configFile: 'fraud_model_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      },
+      {
+        id: 'fraud-v1.7.5',
+        version: 'v1.7.5',
+        createdDate: '2025-01-03',
+        status: 'unpublished',
+        accuracy: '96.9%',
+        modelSize: '85MB',
+        trainingDataset: 'Financial Transactions Dataset 2024',
+        lastEvaluated: '2025-01-08',
+        publishedDate: '2025-01-05',
+        unpublishedDate: '2025-01-15',
+        evaluations: {
+          accuracy: 96.9,
+          precision: 96.2,
+          recall: 97.3,
+          f1Score: 96.7,
+          bias: 0.12,
+          fairness: 0.87,
+          latency: 9.2
+        },
+        artifacts: {
+          modelFile: 'fraud_detector_v1.7.5.h5',
+          configFile: 'fraud_model_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      }
+    ]
+  },
+  {
+    id: 'recommendation-engine',
+    name: 'Product Recommendation Engine',
+    type: 'Recommendation System',
+    framework: 'Scikit-learn',
+    description: 'Collaborative filtering model for personalized product recommendations',
+    developedBy: 'David Kim (Data Scientist)',
+    currentVersion: 'v3.0.1',
+    versions: [
+      {
+        id: 'rec-v3.0.1',
+        version: 'v3.0.1',
+        createdDate: '2025-01-12',
+        status: 'draft',
+        modelSize: '45MB',
+        trainingDataset: 'E-commerce User Behavior Dataset',
+        evaluations: {
+          accuracy: 89.4,
+          precision: 88.9,
+          recall: 90.1,
+          f1Score: 89.5,
+          bias: 0.22,
+          fairness: 0.76,
+          latency: 15.2
+        },
+        artifacts: {
+          modelFile: 'recommendation_engine_v3.0.1.pkl',
+          configFile: 'rec_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      },
+      {
+        id: 'rec-v2.9.8',
+        version: 'v2.9.8',
+        createdDate: '2025-01-09',
+        status: 'published',
+        accuracy: '87.2%',
+        modelSize: '42MB',
+        trainingDataset: 'E-commerce User Behavior Dataset',
+        lastEvaluated: '2025-01-11',
+        publishedDate: '2025-01-11',
+        evaluations: {
+          accuracy: 87.2,
+          precision: 86.8,
+          recall: 87.9,
+          f1Score: 87.3,
+          bias: 0.19,
+          fairness: 0.78,
+          latency: 14.8
+        },
+        artifacts: {
+          modelFile: 'recommendation_engine_v2.9.8.pkl',
+          configFile: 'rec_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      }
+    ]
+  },
+  {
+    id: 'medical-classifier',
+    name: 'Medical Image Classifier',
+    type: 'Computer Vision',
+    framework: 'PyTorch',
+    description: 'CNN model for automated medical image analysis and diagnosis assistance',
+    developedBy: 'Dr. Lisa Wang (Data Scientist)',
+    currentVersion: 'v1.2.0',
+    versions: [
+      {
+        id: 'medical-v1.2.0',
+        version: 'v1.2.0',
+        createdDate: '2025-01-05',
+        status: 'ready',
+        accuracy: '96.1%',
+        modelSize: '220MB',
+        trainingDataset: 'Medical Images Dataset 2024',
+        lastEvaluated: '2025-01-16',
+        evaluations: {
+          accuracy: 96.1,
+          precision: 95.8,
+          recall: 96.4,
+          f1Score: 96.1,
+          bias: 0.11,
+          fairness: 0.88,
+          latency: 18.5
+        },
+        artifacts: {
+          modelFile: 'medical_classifier_v1.2.0.pth',
+          configFile: 'medical_config.json',
+          requirementsFile: 'requirements.txt'
+        }
+      }
+    ]
+  }
+]
+
+const mockModelEvaluations: ModelEvaluation[] = [
+  {
+    id: 'eval-001',
+    modelId: 'ds-model-001',
+    modelName: 'Customer Sentiment Classifier',
+    modelVersion: 'v2.1.3',
+    evaluationType: 'bias',
+    status: 'completed',
+    startedDate: '2025-01-15 09:00:00',
+    completedDate: '2025-01-15 09:45:00',
+    executedBy: 'AI Engineer System',
+    dataset: 'Bias Test Dataset v2',
+    metrics: {
+      overall: 0.15,
+      detailed: {
+        'gender_bias': 0.12,
+        'age_bias': 0.18,
+        'location_bias': 0.14,
+        'language_bias': 0.16
+      }
+    },
+    report: 'bias_evaluation_report_001.pdf'
+  },
+  {
+    id: 'eval-002',
+    modelId: 'ds-model-002',
+    modelName: 'Fraud Detection Neural Network',
+    modelVersion: 'v1.8.0',
+    evaluationType: 'accuracy',
+    status: 'running',
+    startedDate: '2025-01-17 14:30:00',
+    executedBy: 'AI Engineer System',
+    dataset: 'Validation Dataset Q1 2025',
+    metrics: {
+      overall: 0,
+      detailed: {}
+    }
+  },
+  {
+    id: 'eval-003',
+    modelId: 'ds-model-004',
+    modelName: 'Medical Image Classifier',
+    modelVersion: 'v1.2.0',
+    evaluationType: 'fairness',
+    status: 'completed',
+    startedDate: '2025-01-16 11:15:00',
+    completedDate: '2025-01-16 13:22:00',
+    executedBy: 'AI Engineer System',
+    dataset: 'Medical Fairness Test Set',
+    metrics: {
+      overall: 0.88,
+      detailed: {
+        'demographic_parity': 0.89,
+        'equalized_odds': 0.87,
+        'equal_opportunity': 0.88,
+        'calibration': 0.90
+      }
+    },
+    report: 'fairness_evaluation_report_003.pdf'
+  },
+  {
+    id: 'eval-004',
+    modelId: 'ds-model-005',
+    modelName: 'Supply Chain Optimizer',
+    modelVersion: 'v2.3.1',
+    evaluationType: 'performance',
+    status: 'queued',
+    startedDate: '2025-01-17 16:00:00',
+    executedBy: 'AI Engineer System',
+    dataset: 'Performance Benchmark Dataset',
+    metrics: {
+      overall: 0,
+      detailed: {}
+    }
+  },
+  {
+    id: 'eval-005',
+    modelId: 'ds-model-001',
+    modelName: 'Customer Sentiment Classifier',
+    modelVersion: 'v2.1.3',
+    evaluationType: 'robustness',
+    status: 'failed',
+    startedDate: '2025-01-14 10:00:00',
+    completedDate: '2025-01-14 10:15:00',
+    executedBy: 'AI Engineer System',
+    dataset: 'Robustness Test Dataset',
+    metrics: {
+      overall: 0,
+      detailed: {}
+    }
+  },
+  {
+    id: 'eval-006',
+    modelId: 'ds-model-003',
+    modelName: 'Product Recommendation Engine',
+    modelVersion: 'v3.0.1',
+    evaluationType: 'accuracy',
+    status: 'completed',
+    startedDate: '2025-01-13 15:30:00',
+    completedDate: '2025-01-13 16:45:00',
+    executedBy: 'AI Engineer System',
+    dataset: 'Recommendation Accuracy Test Set',
+    metrics: {
+      overall: 89.4,
+      detailed: {
+        'precision_at_5': 91.2,
+        'precision_at_10': 89.8,
+        'recall_at_5': 88.6,
+        'recall_at_10': 87.9,
+        'ndcg_at_5': 90.1,
+        'ndcg_at_10': 89.4
+      }
+    },
+    report: 'accuracy_evaluation_report_006.pdf'
+  }
+]
+
 const mockDeployments: ModelDeployment[] = [
   {
     id: 'deploy-001',
@@ -710,6 +1128,291 @@ const mockDeployments: ModelDeployment[] = [
   }
 ]
 
+// Dataset management interfaces and mock data  
+interface Dataset {
+  id: string
+  name: string
+  description: string
+  type: 'training' | 'validation' | 'test' | 'production' 
+  format: 'CSV' | 'JSON' | 'Parquet' | 'HDF5' | 'TFRecord' | 'Images' | 'Text'
+  size: string
+  recordCount: number
+  createdBy: string
+  createdDate: string
+  lastModified: string
+  version: string
+  tags: string[]
+  schema: {
+    columns: number
+    features: string[]
+    target?: string
+  }
+  storage: {
+    location: string
+    provider: 'S3' | 'Azure Blob' | 'GCS' | 'Local' | 'HDFS'
+    accessLevel: 'public' | 'private' | 'restricted'
+  }
+  quality: {
+    completeness: number
+    validity: number
+    consistency: number
+    duplicates: number
+  }
+  usage: {
+    modelsUsing: number
+    lastAccessed: string
+    downloadCount: number
+  }
+  lineage: {
+    sources: string[]
+    transformations: string[]
+    derived: string[]
+  }
+}
+
+const mockDatasets: Dataset[] = [
+  {
+    id: 'ds-001',
+    name: 'Customer Reviews Dataset v3',
+    description: 'Comprehensive collection of customer reviews and ratings from multiple e-commerce platforms for sentiment analysis training',
+    type: 'training',
+    format: 'CSV',
+    size: '2.1 GB',
+    recordCount: 5_200_000,
+    createdBy: 'Sarah Chen (Data Scientist)',
+    createdDate: '2024-11-15',
+    lastModified: '2025-01-10',
+    version: 'v3.2.1',
+    tags: ['sentiment', 'nlp', 'customer-feedback', 'e-commerce'],
+    schema: {
+      columns: 12,
+      features: ['review_text', 'rating', 'product_category', 'user_demographics', 'review_length', 'product_price_range', 'verified_purchase', 'review_helpfulness', 'language', 'sentiment_label', 'emotion_tags'],
+      target: 'sentiment_score'
+    },
+    storage: {
+      location: 's3://mlops-datasets/customer-reviews/v3.2.1/',
+      provider: 'S3',
+      accessLevel: 'restricted'
+    },
+    quality: {
+      completeness: 94.8,
+      validity: 96.2,
+      consistency: 92.5,
+      duplicates: 0.8
+    },
+    usage: {
+      modelsUsing: 3,
+      lastAccessed: '2025-01-15 14:23:00',
+      downloadCount: 127
+    },
+    lineage: {
+      sources: ['Amazon Reviews API', 'Shopify Store Reviews', 'Google Reviews Export'],
+      transformations: ['text_preprocessing', 'sentiment_labeling', 'data_augmentation'],
+      derived: ['Customer Reviews Mini v3', 'Sentiment Test Set v3']
+    }
+  },
+  {
+    id: 'ds-002',
+    name: 'Financial Transactions Dataset 2024',
+    description: 'Anonymized financial transaction data for fraud detection model training with comprehensive feature engineering',
+    type: 'training',
+    format: 'Parquet',
+    size: '8.7 GB',
+    recordCount: 45_000_000,
+    createdBy: 'Michael Rodriguez (Data Scientist)',
+    createdDate: '2024-08-20',
+    lastModified: '2025-01-08',
+    version: 'v2.1.0',
+    tags: ['fraud-detection', 'financial', 'transactions', 'anomaly'],
+    schema: {
+      columns: 28,
+      features: ['transaction_amount', 'merchant_category', 'transaction_time', 'user_location', 'device_type', 'payment_method', 'account_age', 'transaction_frequency', 'velocity_features', 'merchant_risk_score', 'geo_velocity', 'amount_deviation'],
+      target: 'is_fraud'
+    },
+    storage: {
+      location: 's3://mlops-datasets/financial-fraud/v2.1.0/',
+      provider: 'S3',
+      accessLevel: 'restricted'
+    },
+    quality: {
+      completeness: 99.2,
+      validity: 97.8,
+      consistency: 96.1,
+      duplicates: 0.2
+    },
+    usage: {
+      modelsUsing: 2,
+      lastAccessed: '2025-01-14 10:45:00',
+      downloadCount: 89
+    },
+    lineage: {
+      sources: ['Payment Gateway Logs', 'Merchant Transaction History', 'User Behavior Analytics'],
+      transformations: ['feature_engineering', 'anonymization', 'fraud_labeling', 'temporal_splitting'],
+      derived: ['Fraud Detection Test Set', 'Mini Fraud Dataset']
+    }
+  },
+  {
+    id: 'ds-003', 
+    name: 'E-commerce User Behavior Dataset',
+    description: 'Comprehensive user interaction data from e-commerce platforms for building recommendation systems',
+    type: 'training',
+    format: 'JSON',
+    size: '1.9 GB',
+    recordCount: 12_500_000,
+    createdBy: 'David Kim (Data Scientist)',
+    createdDate: '2024-10-05',
+    lastModified: '2024-12-20',
+    version: 'v1.5.2',
+    tags: ['recommendation', 'user-behavior', 'e-commerce', 'collaborative-filtering'],
+    schema: {
+      columns: 18,
+      features: ['user_id', 'product_id', 'interaction_type', 'timestamp', 'session_duration', 'page_views', 'cart_actions', 'purchase_history', 'product_categories', 'ratings_given', 'reviews_written', 'search_queries'],
+      target: 'purchase_intent'
+    },
+    storage: {
+      location: 'gcs://mlops-datasets/user-behavior/v1.5.2/',
+      provider: 'GCS',
+      accessLevel: 'private'
+    },
+    quality: {
+      completeness: 91.7,
+      validity: 94.3,
+      consistency: 89.2,
+      duplicates: 1.4
+    },
+    usage: {
+      modelsUsing: 1,
+      lastAccessed: '2025-01-12 16:30:00',
+      downloadCount: 67
+    },
+    lineage: {
+      sources: ['Website Analytics', 'Mobile App Events', 'Purchase History'],
+      transformations: ['session_reconstruction', 'feature_extraction', 'user_segmentation'],
+      derived: ['User Behavior Test Set', 'Recommendation Engine Training Data']
+    }
+  },
+  {
+    id: 'ds-004',
+    name: 'Production Images Dataset Q4 2024',
+    description: 'High-resolution industrial product images for computer vision quality control model training',
+    type: 'validation',
+    format: 'Images',
+    size: '15.3 GB',
+    recordCount: 78_000,
+    createdBy: 'Lisa Park (Data Scientist)',
+    createdDate: '2024-12-01',
+    lastModified: '2025-01-05',
+    version: 'v1.2.0',
+    tags: ['computer-vision', 'quality-control', 'manufacturing', 'defect-detection'],
+    schema: {
+      columns: 8,
+      features: ['image_path', 'product_type', 'manufacturing_date', 'quality_label', 'defect_type', 'confidence_score', 'inspector_id'],
+      target: 'quality_status'
+    },
+    storage: {
+      location: 'azure://mlops-datasets/production-images/v1.2.0/',
+      provider: 'Azure Blob',
+      accessLevel: 'private'
+    },
+    quality: {
+      completeness: 97.1,
+      validity: 95.8,
+      consistency: 94.2,
+      duplicates: 0.3
+    },
+    usage: {
+      modelsUsing: 2,
+      lastAccessed: '2025-01-11 09:15:00',
+      downloadCount: 34
+    },
+    lineage: {
+      sources: ['Production Line Cameras', 'Quality Control Database', 'Manual Inspections'],
+      transformations: ['image_preprocessing', 'augmentation', 'quality_labeling'],
+      derived: ['QC Test Images', 'Defect Classification Dataset']
+    }
+  },
+  {
+    id: 'ds-005',
+    name: 'Multi-Language Support Tickets',
+    description: 'Customer support tickets in multiple languages for automated classification and response generation',
+    type: 'training',
+    format: 'Text',
+    size: '950 MB',
+    recordCount: 890_000,
+    createdBy: 'Emma Watson (Data Scientist)',
+    createdDate: '2024-09-12',
+    lastModified: '2024-12-18',
+    version: 'v2.0.3',
+    tags: ['nlp', 'multilingual', 'support-tickets', 'classification', 'text-generation'],
+    schema: {
+      columns: 15,
+      features: ['ticket_text', 'language', 'category', 'priority', 'resolution_time', 'customer_satisfaction', 'agent_response', 'escalation_needed', 'product_area', 'sentiment'],
+      target: 'ticket_category'
+    },
+    storage: {
+      location: 's3://mlops-datasets/support-tickets/v2.0.3/',
+      provider: 'S3',
+      accessLevel: 'restricted'
+    },
+    quality: {
+      completeness: 88.9,
+      validity: 92.1,
+      consistency: 87.5,
+      duplicates: 2.1
+    },
+    usage: {
+      modelsUsing: 1,
+      lastAccessed: '2025-01-09 13:42:00',
+      downloadCount: 23
+    },
+    lineage: {
+      sources: ['Support System Database', 'Email Tickets', 'Chat Transcripts'],
+      transformations: ['text_cleaning', 'language_detection', 'category_mapping', 'anonymization'],
+      derived: ['Support Tickets Test Set', 'Multilingual Classification Data']
+    }
+  },
+  {
+    id: 'ds-006',
+    name: 'Sensor Data Archive 2024',
+    description: 'Time-series sensor data from IoT devices for predictive maintenance model development',
+    type: 'production',
+    format: 'HDF5',
+    size: '12.4 GB',
+    recordCount: 156_000_000,
+    createdBy: 'Alex Thompson (Data Scientist)',
+    createdDate: '2024-01-01',
+    lastModified: '2025-01-01',
+    version: 'v3.1.1',
+    tags: ['time-series', 'iot', 'sensors', 'predictive-maintenance', 'manufacturing'],
+    schema: {
+      columns: 22,
+      features: ['timestamp', 'device_id', 'temperature', 'pressure', 'vibration', 'humidity', 'power_consumption', 'operational_status', 'maintenance_history', 'failure_indicators'],
+      target: 'maintenance_needed'
+    },
+    storage: {
+      location: 'hdfs://mlops-cluster/sensor-data/v3.1.1/',
+      provider: 'HDFS',
+      accessLevel: 'restricted'
+    },
+    quality: {
+      completeness: 96.5,
+      validity: 98.1,
+      consistency: 95.7,
+      duplicates: 0.1
+    },
+    usage: {
+      modelsUsing: 3,
+      lastAccessed: '2025-01-16 08:20:00',
+      downloadCount: 156
+    },
+    lineage: {
+      sources: ['IoT Device Telemetry', 'Maintenance Logs', 'Equipment Specifications'],
+      transformations: ['time_series_aggregation', 'feature_engineering', 'anomaly_labeling'],
+      derived: ['Sensor Data Test Set', 'Maintenance Prediction Training Data', 'Anomaly Detection Dataset']
+    }
+  }
+]
+
 const App: React.FC = () => {
   const [activeItem, setActiveItem] = React.useState<string>('dashboard')
   const [selectedRole, setSelectedRole] = React.useState<Role>('data-scientist')
@@ -720,6 +1423,8 @@ const App: React.FC = () => {
   const [deploymentName, setDeploymentName] = React.useState<string>('')
   const [selectedDeployment, setSelectedDeployment] = React.useState<ModelDeployment | null>(null)
   const [showDeploymentDetail, setShowDeploymentDetail] = React.useState(false)
+  const [selectedModelVersions, setSelectedModelVersions] = React.useState<{ [familyId: string]: string }>({})
+  const [expandedModelFamilies, setExpandedModelFamilies] = React.useState<{ [familyId: string]: boolean }>({})
   
   const currentRole = roles.find(role => role.id === selectedRole)!
   
@@ -790,6 +1495,41 @@ const App: React.FC = () => {
     setSelectedDeployment(null);
   }
 
+  // Helper functions for version management
+  const getSelectedVersionForFamily = (familyId: string): ModelVersion | null => {
+    const family = mockModelFamilies.find(f => f.id === familyId)
+    if (!family) return null
+    
+    const selectedVersionId = selectedModelVersions[familyId] || family.currentVersion
+    return family.versions.find(v => v.version === selectedVersionId) || family.versions[0] || null
+  }
+
+  const handleVersionSelection = (familyId: string, version: string) => {
+    setSelectedModelVersions(prev => ({
+      ...prev,
+      [familyId]: version
+    }))
+  }
+
+  const handlePublishVersion = (familyId: string, versionId: string) => {
+    console.log('Publishing version:', { familyId, versionId })
+    // In a real app, this would make an API call to publish the version
+    // For now, we'll just log it
+  }
+
+  const handleUnpublishVersion = (familyId: string, versionId: string) => {
+    console.log('Unpublishing version:', { familyId, versionId })
+    // In a real app, this would make an API call to unpublish the version
+    // For now, we'll just log it
+  }
+
+  const toggleModelFamilyExpansion = (familyId: string) => {
+    setExpandedModelFamilies(prev => ({
+      ...prev,
+      [familyId]: !prev[familyId]
+    }))
+  }
+
   // Generate mock performance data for deployment details
   const generateDeploymentPerformanceData = (baseLatency: number, baseCpu: number, baseMemory: number) => {
     const data = []
@@ -813,11 +1553,17 @@ const App: React.FC = () => {
     const roleConfigs = {
       'data-scientist': {
         title: 'Data Science',
-        items: []
+        items: [
+          { id: 'datasets', label: 'Datasets', icon: <DatabaseIcon /> }
+        ]
       },
       'ai-engineer': {
         title: 'AI Engineering',
-        items: []
+        items: [
+          { id: 'models', label: 'Models', icon: <CubeIcon /> },
+          { id: 'evaluations', label: 'Evaluations', icon: <ChartBarIcon /> },
+          { id: 'datasets', label: 'Datasets', icon: <DatabaseIcon /> }
+        ]
       },
       'site-engineer': {
         title: 'Site Reliability',
@@ -1394,10 +2140,902 @@ const App: React.FC = () => {
     // Role-specific content for non-dashboard items
     const contentMap = {
       'data-scientist': {
-        // Only dashboard is implemented for data scientist
+        'datasets': (
+          <PageSection>
+            <div style={{ marginBottom: '24px' }}>
+              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                Dataset Repository
+              </Title>
+              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                Manage and explore datasets for machine learning model development. Monitor quality, usage, and lineage across your ML pipeline.
+              </p>
+            </div>
+            
+            <Gallery hasGutter minWidths={{ default: '350px' }}>
+              {mockDatasets.map((dataset) => (
+                <GalleryItem key={dataset.id}>
+                  <Card style={{ height: '100%' }}>
+                    <CardHeader>
+                      <Split hasGutter>
+                        <SplitItem isFilled>
+                          <Title headingLevel="h3" size="md">
+                            {dataset.name}
+                          </Title>
+                        </SplitItem>
+                        <SplitItem>
+                          <Label 
+                            color={
+                              dataset.type === 'production' ? 'green' :
+                              dataset.type === 'training' ? 'blue' :
+                              dataset.type === 'validation' ? 'purple' : 'orange'
+                            }
+                          >
+                            {dataset.type.charAt(0).toUpperCase() + dataset.type.slice(1)}
+                          </Label>
+                        </SplitItem>
+                      </Split>
+                      <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                        {dataset.format} • {dataset.size} • {dataset.recordCount.toLocaleString()} records
+                      </div>
+                    </CardHeader>
+                    <CardBody>
+                      <p style={{ fontSize: '14px', marginBottom: '16px', color: 'var(--pf-v6-global--Color--200)' }}>
+                        {dataset.description}
+                      </p>
+                      
+                      {/* Dataset Metadata */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                          <div>
+                            <strong>Created by:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.createdBy}</span>
+                          </div>
+                          <div>
+                            <strong>Version:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.version}</span>
+                          </div>
+                          <div>
+                            <strong>Created:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.createdDate}</span>
+                          </div>
+                          <div>
+                            <strong>Modified:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.lastModified}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Quality Metrics */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px' }}>Data Quality</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Completeness:</span>
+                            <span style={{ 
+                              color: dataset.quality.completeness >= 95 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.completeness >= 90 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.completeness}%
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Validity:</span>
+                            <span style={{ 
+                              color: dataset.quality.validity >= 95 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.validity >= 90 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.validity}%
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Consistency:</span>
+                            <span style={{ 
+                              color: dataset.quality.consistency >= 95 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.consistency >= 90 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.consistency}%
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Duplicates:</span>
+                            <span style={{ 
+                              color: dataset.quality.duplicates <= 1 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.duplicates <= 5 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.duplicates}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Storage & Usage Info */}
+                      <div style={{ marginBottom: '16px', fontSize: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span>Storage:</span>
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.storage.provider}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span>Access Level:</span>
+                          <Label size="sm" color={
+                            dataset.storage.accessLevel === 'public' ? 'green' :
+                            dataset.storage.accessLevel === 'private' ? 'blue' : 'orange'
+                          }>
+                            {dataset.storage.accessLevel}
+                          </Label>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span>Models Using:</span>
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.usage.modelsUsing}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Downloads:</span>
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.usage.downloadCount}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Tags */}
+                      {dataset.tags.length > 0 && (
+                        <div style={{ marginBottom: '16px' }}>
+                          <div style={{ marginBottom: '4px', fontSize: '12px', fontWeight: '600' }}>Tags:</div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {dataset.tags.slice(0, 3).map(tag => (
+                              <Label key={tag} size="sm" color="grey">
+                                {tag}
+                              </Label>
+                            ))}
+                            {dataset.tags.length > 3 && (
+                              <Label size="sm" color="grey">
+                                +{dataset.tags.length - 3} more
+                              </Label>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Action Buttons */}
+                      <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                        <FlexItem>
+                          <Button variant="primary" size="sm">
+                            <DatabaseIcon style={{ marginRight: '4px' }} />
+                            Explore Data
+                          </Button>
+                        </FlexItem>
+                        <FlexItem>
+                          <Button variant="secondary" size="sm">
+                            Download
+                          </Button>
+                        </FlexItem>
+                        <FlexItem>
+                          <Button variant="link" size="sm">
+                            View Schema
+                          </Button>
+                        </FlexItem>
+                      </Flex>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+              ))}
+            </Gallery>
+          </PageSection>
+        )
       },
       'ai-engineer': {
-        // Only dashboard is implemented for ai engineer
+        'models': (
+          <PageSection>
+            <div style={{ marginBottom: '24px' }}>
+              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                Models Repository
+              </Title>
+              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                Review, evaluate, and publish models developed by Data Scientists. Manage model lifecycle from development to production.
+              </p>
+            </div>
+            
+            <Gallery hasGutter minWidths={{ default: '400px' }}>
+              {mockModelFamilies.map((family) => {
+                const selectedVersion = getSelectedVersionForFamily(family.id)
+                const isExpanded = expandedModelFamilies[family.id]
+                return (
+                <GalleryItem key={family.id}>
+                  <Card style={{ height: '100%' }}>
+                    <CardHeader>
+                      <Split hasGutter>
+                        <SplitItem isFilled>
+                          <Title headingLevel="h3" size="md">
+                            {family.name}
+                          </Title>
+                        </SplitItem>
+                        <SplitItem>
+                          <Button
+                            variant="plain"
+                            onClick={() => toggleModelFamilyExpansion(family.id)}
+                            style={{ padding: '4px' }}
+                          >
+                            {isExpanded ? '▼' : '▶'} {family.versions.length} versions
+                          </Button>
+                        </SplitItem>
+                      </Split>
+                      <p style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', margin: 0 }}>
+                        {family.type} • {family.framework}
+                      </p>
+                      <p style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--300)', margin: '4px 0 0 0' }}>
+                        Developed by {family.developedBy}
+                      </p>
+                    </CardHeader>
+                    
+                    <CardBody>
+                      <p style={{ fontSize: '14px', marginBottom: '16px', lineHeight: '1.4' }}>
+                        {family.description}
+                      </p>
+                      
+                      {selectedVersion && (
+                        <>
+                          {/* Version Selector */}
+                          <div style={{ marginBottom: '16px' }}>
+                            <Title headingLevel="h5" size="sm" style={{ marginBottom: '8px' }}>
+                              Version Selection
+                            </Title>
+                            <FormSelect
+                              value={selectedModelVersions[family.id] || family.currentVersion || family.versions[0]?.version}
+                              onChange={(event, value) => handleVersionSelection(family.id, value)}
+                            >
+                              {family.versions.map((version) => (
+                                <FormSelectOption
+                                  key={version.version}
+                                  value={version.version}
+                                  label={`${version.version} (${version.status}${version.accuracy ? ` - ${version.accuracy}` : ''})`}
+                                />
+                              ))}
+                            </FormSelect>
+                          </div>
+
+                          {/* Selected Version Details */}
+                          <div style={{ marginBottom: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                              <Title headingLevel="h5" size="sm" style={{ margin: 0 }}>
+                                {selectedVersion.version} Details
+                              </Title>
+                              <Label 
+                                color={
+                                  selectedVersion.status === 'published' ? 'green' :
+                                  selectedVersion.status === 'ready' ? 'blue' :
+                                  selectedVersion.status === 'draft' ? 'orange' : 
+                                  selectedVersion.status === 'unpublished' ? 'grey' : 'red'
+                                }
+                              >
+                                {selectedVersion.status === 'published' ? 'Published' :
+                                 selectedVersion.status === 'ready' ? 'Ready' :
+                                 selectedVersion.status === 'draft' ? 'Draft' :
+                                 selectedVersion.status === 'unpublished' ? 'Unpublished' : 'Deprecated'}
+                              </Label>
+                            </div>
+                            
+                            <p style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginBottom: '8px' }}>
+                              Created: {selectedVersion.createdDate} • Size: {selectedVersion.modelSize}
+                              {selectedVersion.publishedDate && ` • Published: ${selectedVersion.publishedDate}`}
+                              {selectedVersion.unpublishedDate && ` • Unpublished: ${selectedVersion.unpublishedDate}`}
+                            </p>
+                          </div>
+
+                          {/* Performance Metrics */}
+                          <div style={{ marginBottom: '16px' }}>
+                            <Title headingLevel="h5" size="sm" style={{ marginBottom: '8px' }}>
+                              Performance Metrics
+                            </Title>
+                            <DescriptionList isCompact isHorizontal>
+                              {selectedVersion.accuracy && (
+                                <DescriptionListGroup>
+                                  <DescriptionListTerm>Accuracy</DescriptionListTerm>
+                                  <DescriptionListDescription>
+                                    <strong style={{ color: 'var(--pf-v6-global--palette--green--500)' }}>
+                                      {selectedVersion.accuracy}
+                                    </strong>
+                                  </DescriptionListDescription>
+                                </DescriptionListGroup>
+                              )}
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>F1 Score</DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  <strong>{selectedVersion.evaluations.f1Score.toFixed(1)}%</strong>
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Fairness</DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  <strong style={{ 
+                                    color: selectedVersion.evaluations.fairness > 0.8 ? 'var(--pf-v6-global--palette--green--500)' : 
+                                           selectedVersion.evaluations.fairness > 0.6 ? 'var(--pf-v6-global--palette--orange--500)' : 
+                                           'var(--pf-v6-global--palette--red--500)' 
+                                  }}>
+                                    {selectedVersion.evaluations.fairness.toFixed(2)}
+                                  </strong>
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Bias Score</DescriptionListTerm>
+                                <DescriptionListDescription>
+                                  <strong style={{ 
+                                    color: selectedVersion.evaluations.bias < 0.2 ? 'var(--pf-v6-global--palette--green--500)' : 
+                                           selectedVersion.evaluations.bias < 0.4 ? 'var(--pf-v6-global--palette--orange--500)' : 
+                                           'var(--pf-v6-global--palette--red--500)' 
+                                  }}>
+                                    {selectedVersion.evaluations.bias.toFixed(2)}
+                                  </strong>
+                                </DescriptionListDescription>
+                              </DescriptionListGroup>
+                            </DescriptionList>
+                          </div>
+                          
+                          {/* Training Details */}
+                          <div style={{ marginBottom: '16px' }}>
+                            <Title headingLevel="h5" size="sm" style={{ marginBottom: '8px' }}>
+                              Training Details
+                            </Title>
+                            <DescriptionList isCompact>
+                              <DescriptionListGroup>
+                                <DescriptionListTerm>Dataset</DescriptionListTerm>
+                                <DescriptionListDescription>{selectedVersion.trainingDataset}</DescriptionListDescription>
+                              </DescriptionListGroup>
+                              {selectedVersion.lastEvaluated && (
+                                <DescriptionListGroup>
+                                  <DescriptionListTerm>Last Evaluated</DescriptionListTerm>
+                                  <DescriptionListDescription>{selectedVersion.lastEvaluated}</DescriptionListDescription>
+                                </DescriptionListGroup>
+                              )}
+                            </DescriptionList>
+                          </div>
+
+                          {/* Expanded Version List */}
+                          {isExpanded && (
+                            <div style={{ marginBottom: '16px' }}>
+                              <Title headingLevel="h5" size="sm" style={{ marginBottom: '8px' }}>
+                                All Versions
+                              </Title>
+                              <div style={{ 
+                                maxHeight: '200px', 
+                                overflowY: 'auto',
+                                border: '1px solid var(--pf-v6-global--BorderColor--200)',
+                                borderRadius: '4px',
+                                padding: '8px'
+                              }}>
+                                {family.versions.map((version, index) => (
+                                  <div key={version.version} style={{ 
+                                    display: 'flex', 
+                                    justifyContent: 'space-between', 
+                                    alignItems: 'center',
+                                    padding: '8px',
+                                    borderBottom: index < family.versions.length - 1 ? '1px solid var(--pf-v6-global--BorderColor--100)' : 'none'
+                                  }}>
+                                    <div>
+                                      <strong>{version.version}</strong>
+                                      <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                                        Created: {version.createdDate}
+                                        {version.accuracy && ` • Accuracy: ${version.accuracy}`}
+                                      </div>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                      <Label 
+                                        color={
+                                          version.status === 'published' ? 'green' :
+                                          version.status === 'ready' ? 'blue' :
+                                          version.status === 'draft' ? 'orange' : 
+                                          version.status === 'unpublished' ? 'grey' : 'red'
+                                        }
+                                        style={{ fontSize: '11px' }}
+                                      >
+                                        {version.status}
+                                      </Label>
+                                      <div style={{ display: 'flex', gap: '4px' }}>
+                                        {version.status === 'ready' && (
+                                          <Button 
+                                            variant="link" 
+                                            size="sm"
+                                            onClick={() => handlePublishVersion(family.id, version.id)}
+                                            style={{ padding: '2px 4px', fontSize: '11px' }}
+                                          >
+                                            Publish
+                                          </Button>
+                                        )}
+                                        {version.status === 'published' && (
+                                          <Button 
+                                            variant="link" 
+                                            size="sm"
+                                            onClick={() => handleUnpublishVersion(family.id, version.id)}
+                                            style={{ padding: '2px 4px', fontSize: '11px' }}
+                                          >
+                                            Unpublish
+                                          </Button>
+                                        )}
+                                        {version.status === 'unpublished' && (
+                                          <Button 
+                                            variant="link" 
+                                            size="sm"
+                                            onClick={() => handlePublishVersion(family.id, version.id)}
+                                            style={{ padding: '2px 4px', fontSize: '11px' }}
+                                          >
+                                            Re-publish
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Action Buttons */}
+                          <div style={{ marginTop: '16px' }}>
+                            <Flex spaceItems={{ default: 'spaceItemsSm' }} direction={{ default: 'column' }}>
+                              <FlexItem>
+                                <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                                  <FlexItem>
+                                    {selectedVersion.status === 'ready' && (
+                                      <Button 
+                                        variant="primary" 
+                                        size="sm"
+                                        onClick={() => handlePublishVersion(family.id, selectedVersion.id)}
+                                      >
+                                        <CloudIcon style={{ marginRight: '4px' }} />
+                                        Publish Version
+                                      </Button>
+                                    )}
+                                    {selectedVersion.status === 'published' && (
+                                      <Button 
+                                        variant="danger" 
+                                        size="sm"
+                                        onClick={() => handleUnpublishVersion(family.id, selectedVersion.id)}
+                                      >
+                                        <CloudIcon style={{ marginRight: '4px' }} />
+                                        Unpublish Version
+                                      </Button>
+                                    )}
+                                    {selectedVersion.status === 'unpublished' && (
+                                      <Button 
+                                        variant="primary" 
+                                        size="sm"
+                                        onClick={() => handlePublishVersion(family.id, selectedVersion.id)}
+                                      >
+                                        <CloudIcon style={{ marginRight: '4px' }} />
+                                        Re-publish Version
+                                      </Button>
+                                    )}
+                                    {(selectedVersion.status === 'draft' || selectedVersion.status === 'deprecated') && (
+                                      <Button 
+                                        variant="primary" 
+                                        size="sm"
+                                        isDisabled={true}
+                                      >
+                                        <CloudIcon style={{ marginRight: '4px' }} />
+                                        {selectedVersion.status === 'draft' ? 'Not Ready' : 'Deprecated'}
+                                      </Button>
+                                    )}
+                                  </FlexItem>
+                                  <FlexItem>
+                                    <Button 
+                                      variant="secondary" 
+                                      size="sm"
+                                      onClick={() => {
+                                        console.log('Starting evaluation for model:', family.name, selectedVersion.version);
+                                      }}
+                                    >
+                                      <PlayIcon style={{ marginRight: '4px' }} />
+                                      Run Evaluation
+                                    </Button>
+                                  </FlexItem>
+                                </Flex>
+                              </FlexItem>
+                              <FlexItem>
+                                <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                                  <FlexItem>
+                                    <Button variant="link" size="sm">
+                                      <FileIcon style={{ marginRight: '4px' }} />
+                                      View Artifacts
+                                    </Button>
+                                  </FlexItem>
+                                  <FlexItem>
+                                    <Button variant="link" size="sm">
+                                      <ChartBarIcon style={{ marginRight: '4px' }} />
+                                      Detailed Metrics
+                                    </Button>
+                                  </FlexItem>
+                                </Flex>
+                              </FlexItem>
+                            </Flex>
+                          </div>
+                        </>
+                      )}
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+                )
+              })}
+            </Gallery>
+          </PageSection>
+        ),
+        'evaluations': (
+          <PageSection>
+            <div style={{ marginBottom: '24px' }}>
+              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                Model Evaluations
+              </Title>
+              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                Monitor and review all model evaluations including bias, fairness, accuracy, and robustness testing.
+              </p>
+            </div>
+            
+            <Card>
+              <CardBody>
+                <Table aria-label="Model Evaluations Table" variant="compact">
+                  <Thead>
+                    <Tr>
+                      <Th width={25}>Model & Version</Th>
+                      <Th width={15}>Evaluation Type</Th>
+                      <Th width={15}>Status</Th>
+                      <Th width={15}>Overall Score</Th>
+                      <Th width={15}>Date</Th>
+                      <Th width={15}>Actions</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {mockModelEvaluations.map((evaluation) => (
+                      <Tr key={evaluation.id}>
+                        <Td>
+                          <div>
+                            <div style={{ fontWeight: '600' }}>{evaluation.modelName}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                              {evaluation.modelVersion}
+                            </div>
+                          </div>
+                        </Td>
+                        <Td>
+                          <Label 
+                            color={
+                              evaluation.evaluationType === 'bias' ? 'red' :
+                              evaluation.evaluationType === 'fairness' ? 'purple' :
+                              evaluation.evaluationType === 'accuracy' ? 'blue' :
+                              evaluation.evaluationType === 'performance' ? 'green' : 'orange'
+                            }
+                            variant="outline"
+                          >
+                            {evaluation.evaluationType.charAt(0).toUpperCase() + evaluation.evaluationType.slice(1)}
+                          </Label>
+                        </Td>
+                        <Td>
+                          <Label 
+                            color={
+                              evaluation.status === 'completed' ? 'green' :
+                              evaluation.status === 'running' ? 'blue' :
+                              evaluation.status === 'failed' ? 'red' : 'orange'
+                            }
+                          >
+                            {evaluation.status === 'completed' ? 'Completed' :
+                             evaluation.status === 'running' ? 'Running' :
+                             evaluation.status === 'failed' ? 'Failed' : 'Queued'}
+                          </Label>
+                        </Td>
+                        <Td>
+                          {evaluation.status === 'completed' ? (
+                            <div>
+                              <strong style={{ 
+                                color: evaluation.evaluationType === 'bias' ? 
+                                  (evaluation.metrics.overall < 0.2 ? 'var(--pf-v6-global--palette--green--500)' : 
+                                   evaluation.metrics.overall < 0.4 ? 'var(--pf-v6-global--palette--orange--500)' : 
+                                   'var(--pf-v6-global--palette--red--500)') :
+                                  (evaluation.metrics.overall > 80 ? 'var(--pf-v6-global--palette--green--500)' : 
+                                   evaluation.metrics.overall > 60 ? 'var(--pf-v6-global--palette--orange--500)' : 
+                                   'var(--pf-v6-global--palette--red--500)')
+                              }}>
+                                {evaluation.evaluationType === 'bias' ? 
+                                  evaluation.metrics.overall.toFixed(2) : 
+                                  evaluation.evaluationType === 'fairness' ?
+                                    evaluation.metrics.overall.toFixed(2) :
+                                    `${evaluation.metrics.overall.toFixed(1)}%`}
+                              </strong>
+                            </div>
+                          ) : (
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)', fontSize: '12px' }}>
+                              {evaluation.status === 'running' ? 'In Progress...' : 'Pending'}
+                            </span>
+                          )}
+                        </Td>
+                        <Td>
+                          <div>
+                            <div style={{ fontSize: '13px' }}>
+                              {evaluation.startedDate.split(' ')[0]}
+                            </div>
+                            <div style={{ fontSize: '11px', color: 'var(--pf-v6-global--Color--200)' }}>
+                              {evaluation.completedDate ? 
+                                `Completed: ${evaluation.completedDate.split(' ')[1]}` :
+                                `Started: ${evaluation.startedDate.split(' ')[1]}`}
+                            </div>
+                          </div>
+                        </Td>
+                        <Td>
+                          <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                            {evaluation.status === 'completed' && evaluation.report && (
+                              <FlexItem>
+                                <Button variant="link" size="sm">
+                                  <ExternalLinkAltIcon style={{ marginRight: '4px' }} />
+                                  Report
+                                </Button>
+                              </FlexItem>
+                            )}
+                            {evaluation.status === 'completed' && (
+                              <FlexItem>
+                                <Button variant="secondary" size="sm">
+                                  View Details
+                                </Button>
+                              </FlexItem>
+                            )}
+                            {evaluation.status === 'failed' && (
+                              <FlexItem>
+                                <Button variant="tertiary" size="sm">
+                                  Retry
+                                </Button>
+                              </FlexItem>
+                            )}
+                          </Flex>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+                
+                {mockModelEvaluations.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '48px' }}>
+                    <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                      No evaluations found. Start evaluating models from the Models tab.
+                    </p>
+                  </div>
+                )}
+              </CardBody>
+            </Card>
+            
+            {/* Summary Cards */}
+            <div style={{ marginTop: '32px' }}>
+              <Title headingLevel="h2" size="xl" style={{ marginBottom: '16px' }}>
+                Evaluation Summary
+              </Title>
+              <Gallery hasGutter minWidths={{ default: '200px' }}>
+                <GalleryItem>
+                  <Card>
+                    <CardBody>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px', color: 'var(--pf-v6-global--palette--green--500)' }}>
+                          {mockModelEvaluations.filter(e => e.status === 'completed').length}
+                        </div>
+                        <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Completed</div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+                <GalleryItem>
+                  <Card>
+                    <CardBody>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px', color: 'var(--pf-v6-global--palette--blue--500)' }}>
+                          {mockModelEvaluations.filter(e => e.status === 'running').length}
+                        </div>
+                        <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Running</div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+                <GalleryItem>
+                  <Card>
+                    <CardBody>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px', color: 'var(--pf-v6-global--palette--orange--500)' }}>
+                          {mockModelEvaluations.filter(e => e.status === 'queued').length}
+                        </div>
+                        <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Queued</div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+                <GalleryItem>
+                  <Card>
+                    <CardBody>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px', color: 'var(--pf-v6-global--palette--red--500)' }}>
+                          {mockModelEvaluations.filter(e => e.status === 'failed').length}
+                        </div>
+                        <div style={{ color: 'var(--pf-v6-global--Color--200)' }}>Failed</div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+              </Gallery>
+            </div>
+          </PageSection>
+        ),
+        'datasets': (
+          <PageSection>
+            <div style={{ marginBottom: '24px' }}>
+              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                Dataset Repository
+              </Title>
+              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                Manage and explore datasets for machine learning model development. Monitor quality, usage, and lineage across your ML pipeline.
+              </p>
+            </div>
+            
+            <Gallery hasGutter minWidths={{ default: '350px' }}>
+              {mockDatasets.map((dataset) => (
+                <GalleryItem key={dataset.id}>
+                  <Card style={{ height: '100%' }}>
+                    <CardHeader>
+                      <Split hasGutter>
+                        <SplitItem isFilled>
+                          <Title headingLevel="h3" size="md">
+                            {dataset.name}
+                          </Title>
+                        </SplitItem>
+                        <SplitItem>
+                          <Label 
+                            color={
+                              dataset.type === 'production' ? 'green' :
+                              dataset.type === 'training' ? 'blue' :
+                              dataset.type === 'validation' ? 'purple' : 'orange'
+                            }
+                          >
+                            {dataset.type.charAt(0).toUpperCase() + dataset.type.slice(1)}
+                          </Label>
+                        </SplitItem>
+                      </Split>
+                      <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                        {dataset.format} • {dataset.size} • {dataset.recordCount.toLocaleString()} records
+                      </div>
+                    </CardHeader>
+                    <CardBody>
+                      <p style={{ fontSize: '14px', marginBottom: '16px', color: 'var(--pf-v6-global--Color--200)' }}>
+                        {dataset.description}
+                      </p>
+                      
+                      {/* Dataset Metadata */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                          <div>
+                            <strong>Created by:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.createdBy}</span>
+                          </div>
+                          <div>
+                            <strong>Version:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.version}</span>
+                          </div>
+                          <div>
+                            <strong>Created:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.createdDate}</span>
+                          </div>
+                          <div>
+                            <strong>Modified:</strong><br />
+                            <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.lastModified}</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Quality Metrics */}
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px' }}>Data Quality</div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Completeness:</span>
+                            <span style={{ 
+                              color: dataset.quality.completeness >= 95 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.completeness >= 90 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.completeness}%
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Validity:</span>
+                            <span style={{ 
+                              color: dataset.quality.validity >= 95 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.validity >= 90 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.validity}%
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Consistency:</span>
+                            <span style={{ 
+                              color: dataset.quality.consistency >= 95 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.consistency >= 90 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.consistency}%
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Duplicates:</span>
+                            <span style={{ 
+                              color: dataset.quality.duplicates <= 1 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     dataset.quality.duplicates <= 5 ? 'var(--pf-v6-global--palette--orange--600)' : 
+                                     'var(--pf-v6-global--palette--red--600)'
+                            }}>
+                              {dataset.quality.duplicates}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Storage & Usage Info */}
+                      <div style={{ marginBottom: '16px', fontSize: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span>Storage:</span>
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.storage.provider}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span>Access Level:</span>
+                          <Label size="sm" color={
+                            dataset.storage.accessLevel === 'public' ? 'green' :
+                            dataset.storage.accessLevel === 'private' ? 'blue' : 'orange'
+                          }>
+                            {dataset.storage.accessLevel}
+                          </Label>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span>Models Using:</span>
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.usage.modelsUsing}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span>Downloads:</span>
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{dataset.usage.downloadCount}</span>
+                        </div>
+                      </div>
+                      
+                      {/* Tags */}
+                      {dataset.tags.length > 0 && (
+                        <div style={{ marginBottom: '16px' }}>
+                          <div style={{ marginBottom: '4px', fontSize: '12px', fontWeight: '600' }}>Tags:</div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {dataset.tags.slice(0, 3).map(tag => (
+                              <Label key={tag} size="sm" color="grey">
+                                {tag}
+                              </Label>
+                            ))}
+                            {dataset.tags.length > 3 && (
+                              <Label size="sm" color="grey">
+                                +{dataset.tags.length - 3} more
+                              </Label>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Action Buttons */}
+                      <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                        <FlexItem>
+                          <Button variant="primary" size="sm">
+                            <DatabaseIcon style={{ marginRight: '4px' }} />
+                            Explore Data
+                          </Button>
+                        </FlexItem>
+                        <FlexItem>
+                          <Button variant="secondary" size="sm">
+                            Download
+                          </Button>
+                        </FlexItem>
+                        <FlexItem>
+                          <Button variant="link" size="sm">
+                            View Schema
+                          </Button>
+                        </FlexItem>
+                      </Flex>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+              ))}
+            </Gallery>
+          </PageSection>
+        )
       },
       'site-engineer': {
         'available-models': (
