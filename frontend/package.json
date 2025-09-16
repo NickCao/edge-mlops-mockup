@@ -8,15 +8,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "tsc --noEmit",
-    "predeploy": "bun run build",
-    "deploy": "gh-pages -d dist -m 'Deploy MLOps Frontend to GitHub Pages'"
+    "lint": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.2",
+    "gh-pages": "^6.3.0",
     "vite": "^7.1.5"
   },
   "peerDependencies": {
