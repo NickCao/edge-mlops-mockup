@@ -1425,6 +1425,10 @@ const App: React.FC = () => {
   const [showDeploymentDetail, setShowDeploymentDetail] = React.useState(false)
   const [selectedModelVersions, setSelectedModelVersions] = React.useState<{ [familyId: string]: string }>({})
   const [expandedModelFamilies, setExpandedModelFamilies] = React.useState<{ [familyId: string]: boolean }>({})
+  const [isEvaluationModalOpen, setIsEvaluationModalOpen] = React.useState(false)
+  const [selectedEvaluationModel, setSelectedEvaluationModel] = React.useState<{familyId: string, familyName: string, version: string, versionId: string} | null>(null)
+  const [selectedEvaluationDataset, setSelectedEvaluationDataset] = React.useState<string>('')
+  const [selectedEvaluationType, setSelectedEvaluationType] = React.useState<'accuracy' | 'bias' | 'fairness' | 'performance' | 'robustness'>('accuracy')
   
   const currentRole = roles.find(role => role.id === selectedRole)!
   
@@ -1521,6 +1525,43 @@ const App: React.FC = () => {
     console.log('Unpublishing version:', { familyId, versionId })
     // In a real app, this would make an API call to unpublish the version
     // For now, we'll just log it
+  }
+
+  const handleOpenEvaluationModal = (familyId: string, familyName: string, version: string, versionId: string) => {
+    setSelectedEvaluationModel({ familyId, familyName, version, versionId })
+    setSelectedEvaluationDataset('')
+    setSelectedEvaluationType('accuracy')
+    setIsEvaluationModalOpen(true)
+  }
+
+  const handleCloseEvaluationModal = () => {
+    setIsEvaluationModalOpen(false)
+    setSelectedEvaluationModel(null)
+    setSelectedEvaluationDataset('')
+    setSelectedEvaluationType('accuracy')
+  }
+
+  const handleStartEvaluation = () => {
+    if (!selectedEvaluationModel || !selectedEvaluationDataset) {
+      return
+    }
+
+    console.log('Starting evaluation:', {
+      model: selectedEvaluationModel,
+      dataset: selectedEvaluationDataset,
+      evaluationType: selectedEvaluationType
+    })
+
+    // Close modal
+    handleCloseEvaluationModal()
+    
+    // Navigate to evaluations tab
+    setActiveItem('evaluations')
+    
+    // In a real app, this would:
+    // 1. Create a new evaluation record
+    // 2. Start the evaluation job
+    // 3. Update the evaluations list
   }
 
   const toggleModelFamilyExpansion = (familyId: string) => {
@@ -2619,9 +2660,7 @@ const App: React.FC = () => {
                                     <Button 
                                       variant="secondary" 
                                       size="sm"
-                                      onClick={() => {
-                                        console.log('Starting evaluation for model:', family.name, selectedVersion.version);
-                                      }}
+                                      onClick={() => handleOpenEvaluationModal(family.id, family.name, selectedVersion.version, selectedVersion.id)}
                                     >
                                       <PlayIcon style={{ marginRight: '4px' }} />
                                       Run Evaluation
@@ -3665,6 +3704,154 @@ const App: React.FC = () => {
               </Button>
             </div>
           </Form>
+          </div>
+        )}
+      </Modal>
+
+      {/* Evaluation Modal */}
+      <Modal
+        variant={ModalVariant.medium}
+        title="Run Model Evaluation"
+        isOpen={isEvaluationModalOpen}
+        onClose={handleCloseEvaluationModal}
+      >
+        {selectedEvaluationModel && (
+          <div style={{ padding: '24px' }}>
+            <Form>
+              {/* Model Information */}
+              <FormGroup label="Model Information" fieldId="eval-model-info" style={{ marginBottom: '20px' }}>
+                <div style={{ 
+                  padding: '16px', 
+                  backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
+                  borderRadius: '4px',
+                  border: '1px solid var(--pf-v6-global--BorderColor--200)'
+                }}>
+                  <Title headingLevel="h4" size="md" style={{ margin: 0, marginBottom: '8px' }}>
+                    {selectedEvaluationModel.familyName}
+                  </Title>
+                  <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                    Version: <strong>{selectedEvaluationModel.version}</strong>
+                  </div>
+                </div>
+              </FormGroup>
+
+              {/* Evaluation Type */}
+              <FormGroup 
+                label="Evaluation Type" 
+                fieldId="evaluation-type" 
+                isRequired
+                helperText="Select the type of evaluation to run on this model."
+                style={{ marginBottom: '20px' }}
+              >
+                <FormSelect
+                  value={selectedEvaluationType}
+                  onChange={(event, value) => setSelectedEvaluationType(value as any)}
+                  id="evaluation-type"
+                  name="evaluation-type"
+                >
+                  <FormSelectOption value="accuracy" label="Accuracy Assessment" />
+                  <FormSelectOption value="bias" label="Bias Detection" />
+                  <FormSelectOption value="fairness" label="Fairness Analysis" />
+                  <FormSelectOption value="performance" label="Performance Benchmarking" />
+                  <FormSelectOption value="robustness" label="Robustness Testing" />
+                </FormSelect>
+              </FormGroup>
+
+              {/* Dataset Selection */}
+              <FormGroup 
+                label="Evaluation Dataset" 
+                fieldId="evaluation-dataset" 
+                isRequired
+                helperText="Choose the dataset to evaluate the model against."
+                style={{ marginBottom: '20px' }}
+              >
+                <FormSelect
+                  value={selectedEvaluationDataset}
+                  onChange={(event, value) => setSelectedEvaluationDataset(value)}
+                  id="evaluation-dataset"
+                  name="evaluation-dataset"
+                >
+                  <FormSelectOption value="" label="Select a dataset..." />
+                  {mockDatasets.map((dataset) => (
+                    <FormSelectOption
+                      key={dataset.id}
+                      value={dataset.id}
+                      label={`${dataset.name} (${dataset.format} • ${dataset.size})`}
+                    />
+                  ))}
+                </FormSelect>
+                
+                {/* Dataset Details */}
+                {selectedEvaluationDataset && (
+                  <div style={{ 
+                    marginTop: '12px',
+                    padding: '12px', 
+                    backgroundColor: 'var(--pf-v6-global--BackgroundColor--100)', 
+                    borderRadius: '4px',
+                    border: '1px solid var(--pf-v6-global--BorderColor--200)',
+                    fontSize: '13px'
+                  }}>
+                    {(() => {
+                      const dataset = mockDatasets.find(d => d.id === selectedEvaluationDataset);
+                      return dataset ? (
+                        <div>
+                          <div style={{ fontWeight: '600', marginBottom: '4px' }}>
+                            📊 {dataset.name}
+                          </div>
+                          <div style={{ marginBottom: '4px', color: 'var(--pf-v6-global--Color--200)' }}>
+                            {dataset.recordCount.toLocaleString()} records • {dataset.version}
+                          </div>
+                          <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--300)' }}>
+                            Quality: {dataset.quality.completeness}% complete, {dataset.quality.validity}% valid
+                          </div>
+                        </div>
+                      ) : null;
+                    })()}
+                  </div>
+                )}
+              </FormGroup>
+
+              {/* Evaluation Summary */}
+              {selectedEvaluationDataset && (
+                <Alert 
+                  variant="info" 
+                  title="📋 Evaluation Summary"
+                  style={{ marginBottom: '16px' }}
+                  isInline
+                >
+                  <div style={{ fontSize: '14px', lineHeight: '1.4' }}>
+                    <strong>{selectedEvaluationType.charAt(0).toUpperCase() + selectedEvaluationType.slice(1)}</strong> evaluation will be performed on <strong>{selectedEvaluationModel.familyName} {selectedEvaluationModel.version}</strong> using the selected dataset.
+                    <div style={{ marginTop: '8px', fontSize: '13px', color: 'var(--pf-v6-global--Color--200)' }}>
+                      The evaluation may take several minutes to complete depending on the dataset size and model complexity.
+                    </div>
+                  </div>
+                </Alert>
+              )}
+              
+              {/* Action Buttons */}
+              <div style={{ 
+                marginTop: '24px', 
+                paddingTop: '16px', 
+                borderTop: '1px solid var(--pf-v6-global--BorderColor--200)',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                gap: '12px'
+              }}>
+                <Button
+                  variant="link"
+                  onClick={handleCloseEvaluationModal}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleStartEvaluation}
+                  isDisabled={!selectedEvaluationDataset}
+                >
+                  Start Evaluation
+                </Button>
+              </div>
+            </Form>
           </div>
         )}
       </Modal>
