@@ -31,36 +31,42 @@ export const formatModelParameters = (params: string): string => {
 /**
  * Calculates deployment success rate
  */
-export const calculateSuccessRate = (successful: number, failed: number): number => {
-  const total = successful + failed
+export const calculateSuccessRate = (successful: any, failed: any): number => {
+  const successfulNum = Number(successful) || 0
+  const failedNum = Number(failed) || 0
+  
+  // Handle negative numbers
+  const safeSuccessful = Math.max(0, successfulNum)
+  const safeFailed = Math.max(0, failedNum)
+  
+  const total = safeSuccessful + safeFailed
   if (total === 0) return 0
-  return Math.round((successful / total) * 100)
+  return Math.round((safeSuccessful / total) * 100)
 }
 
 /**
  * Validates model configuration
  */
-export const validateModelConfig = (config: {
-  name: string
-  description: string
-  type: string
-  framework: string
-}): string[] => {
+export const validateModelConfig = (config: any): string[] => {
   const errors: string[] = []
   
-  if (!config.name || config.name.trim().length === 0) {
+  if (!config || typeof config !== 'object') {
+    return ['Invalid configuration object']
+  }
+  
+  if (!config.name || typeof config.name !== 'string' || config.name.trim().length === 0) {
     errors.push('Model name is required')
   }
   
-  if (!config.description || config.description.trim().length === 0) {
+  if (!config.description || typeof config.description !== 'string' || config.description.trim().length === 0) {
     errors.push('Model description is required')
   }
   
-  if (!config.type || config.type.trim().length === 0) {
+  if (!config.type || typeof config.type !== 'string' || config.type.trim().length === 0) {
     errors.push('Model type is required')
   }
   
-  if (!config.framework || config.framework.trim().length === 0) {
+  if (!config.framework || typeof config.framework !== 'string' || config.framework.trim().length === 0) {
     errors.push('Model framework is required')
   }
   
@@ -70,10 +76,11 @@ export const validateModelConfig = (config: {
 /**
  * Generates a unique model ID
  */
-export const generateModelId = (name: string, timestamp?: number): string => {
-  const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '-')
+export const generateModelId = (name: any, timestamp?: number): string => {
+  const safeName = (name == null ? 'unnamed' : String(name)).toLowerCase().replace(/[^a-z0-9]/g, '-')
   const time = timestamp || Date.now()
-  return `${cleanName}-${time.toString().slice(-6)}`
+  const timeStr = isNaN(time) ? '000000' : time.toString().slice(-6)
+  return `${safeName}-${timeStr}`
 }
 
 /**
@@ -104,27 +111,27 @@ export const calculateDataQuality = (metrics: {
 /**
  * Validates import configuration
  */
-export const validateImportConfig = (config: {
-  source: string
-  modelId: string
-  name: string
-}): string[] => {
+export const validateImportConfig = (config: any): string[] => {
   const errors: string[] = []
   
-  if (!config.source || config.source.trim().length === 0) {
+  if (!config || typeof config !== 'object') {
+    return ['Invalid configuration object']
+  }
+  
+  if (!config.source || typeof config.source !== 'string' || config.source.trim().length === 0) {
     errors.push('Import source is required')
   }
   
-  if (!config.modelId || config.modelId.trim().length === 0) {
+  if (!config.modelId || typeof config.modelId !== 'string' || config.modelId.trim().length === 0) {
     errors.push('Model ID is required')
   }
   
-  if (!config.name || config.name.trim().length === 0) {
+  if (!config.name || typeof config.name !== 'string' || config.name.trim().length === 0) {
     errors.push('Model name is required')
   }
   
   // Validate Hugging Face model ID format
-  if (config.source === 'huggingface' && config.modelId) {
+  if (config.source === 'huggingface' && config.modelId && typeof config.modelId === 'string') {
     const hfPattern = /^[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+$/
     if (!hfPattern.test(config.modelId)) {
       errors.push('Hugging Face model ID must be in format: organization/model-name')
