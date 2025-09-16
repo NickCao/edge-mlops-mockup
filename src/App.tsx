@@ -2166,7 +2166,7 @@ const App: React.FC = () => {
                   <div style={{ marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                       <div style={{ width: '12px', height: '12px', backgroundColor: '#3e8635', marginRight: '8px', borderRadius: '2px' }}></div>
-                      <span style={{ fontSize: '14px' }}>Production Ready (>90%): <strong>8 models</strong></span>
+                      <span style={{ fontSize: '14px' }}>Production Ready (&gt;90%): <strong>8 models</strong></span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                       <div style={{ width: '12px', height: '12px', backgroundColor: '#f0ab00', marginRight: '8px', borderRadius: '2px' }}></div>
@@ -2174,7 +2174,7 @@ const App: React.FC = () => {
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
                       <div style={{ width: '12px', height: '12px', backgroundColor: '#c9190b', marginRight: '8px', borderRadius: '2px' }}></div>
-                      <span style={{ fontSize: '14px' }}>Needs Improvement (<80%): <strong>5 models</strong></span>
+                      <span style={{ fontSize: '14px' }}>Needs Improvement (&lt;80%): <strong>5 models</strong></span>
                     </div>
                   </div>
                   <div style={{ fontSize: '13px', color: 'var(--pf-v6-global--Color--200)' }}>
