@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "Playwright": {
+      "command": "bunx @playwright/mcp@latest --browser firefox"
+    }
+  }
+}
