@@ -1777,16 +1777,6 @@ const App: React.FC = () => {
             ))}
           </NavGroup>
         )}
-        
-        {/* Settings - Always visible */}
-        <NavItem 
-          itemId="settings" 
-          isActive={activeItem === 'settings'}
-          icon={<CogIcon />}
-          onClick={() => setActiveItem('settings')}
-        >
-          Settings
-        </NavItem>
       </NavList>
     </Nav>
   )
@@ -4625,20 +4615,6 @@ const App: React.FC = () => {
     
     if (currentItem === 'dashboard') {
       return renderDashboard()
-    }
-    
-    if (currentItem === 'settings') {
-      return (
-        <PageSection>
-          <Card>
-            <CardTitle>Settings</CardTitle>
-            <CardBody>
-              <p>Configure your MLOps platform settings for {currentRole.name}.</p>
-              <Button variant="primary">Update Configuration</Button>
-            </CardBody>
-          </Card>
-        </PageSection>
-      )
     }
     
     return renderRoleSpecificContent()
