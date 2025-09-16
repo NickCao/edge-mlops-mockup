@@ -6,10 +6,10 @@ Successfully implemented a comprehensive unit testing suite for the MLOps Platfo
 
 ## Test Framework
 
-- **Test Runner**: Bun Test (native Bun testing framework)
-- **Total Tests**: 37 tests across 5 test files
+- **Test Runner**: Bun Test (native Bun testing framework)  
+- **Total Tests**: 95 tests across 8 test files
 - **Test Status**: ✅ All tests passing
-- **Execution Time**: ~300ms
+- **Execution Time**: ~350ms
 
 ## Test Coverage
 
@@ -39,13 +39,33 @@ Successfully implemented a comprehensive unit testing suite for the MLOps Platfo
 - Tests arithmetic operations, string manipulations, and array operations
 - Serves as a sanity check for the testing framework
 
+### 6. Utility Functions (`src/__tests__/utils.test.ts`)
+- **47 tests** covering comprehensive utility functions
+- Tests validation logic, formatting utilities, ID generation, and configuration validation
+- Covers: role validation, model parameter formatting, success rate calculation, config validation, file size formatting, data quality scoring, import validation, duration formatting
+- Includes edge cases, error handling, and performance validation
+
+### 7. Application Constants (`src/__tests__/constants.test.ts`)
+- **10 tests** validating application configuration and constants
+- Tests role constants, model types, framework names, status values, navigation items
+- Validates API endpoint patterns, file formats, environment configs, performance thresholds, color palettes
+- Ensures consistent naming conventions and valid configuration values
+
+### 8. Integration Tests (`src/__tests__/integration.test.ts`)
+- **17 tests** covering cross-component integration and workflows
+- Tests consistency between mock data and validation logic
+- Validates complete workflows (model creation → import → deployment)
+- Performance tests for bulk operations
+- Error message consistency and formatting standards
+
 ## Test Results
 
 ```bash
-✓ 37 tests passed
+✓ 95 tests passed
 ✗ 0 tests failed
-📊 651 expect() calls executed
-⏱️ Total execution time: 302ms
+📊 1,004 expect() calls executed  
+⏱️ Total execution time: ~350ms
+📈 Coverage: 70.00% functions, 64.95% lines (up from 62.5%/56.19%)
 ```
 
 ## Testing Strategy
@@ -89,11 +109,16 @@ src/
 ├── __tests__/
 │   ├── bun-simple.test.ts      # Basic functionality tests
 │   ├── types.test.ts           # TypeScript type definitions tests  
-│   └── App-simple.test.ts      # Main App component tests
+│   ├── App-simple.test.ts      # Main App component tests
+│   ├── utils.test.ts           # Utility functions tests
+│   ├── constants.test.ts       # Application constants validation
+│   └── integration.test.ts     # Cross-component integration tests
 ├── components/__tests__/
 │   └── DataScientistDashboard-simple.test.ts  # Dashboard component tests
 ├── data/__tests__/
 │   └── mockData-simple.test.ts # Mock data utility tests
+├── utils/
+│   └── testHelpers.ts          # Utility functions for validation and formatting
 └── test/
     └── setup.ts                # Test configuration (minimal)
 ```
