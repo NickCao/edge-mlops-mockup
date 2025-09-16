@@ -72,7 +72,7 @@ import {
 import { VictoryChart, VictoryLine, VictoryAxis, VictoryArea, VictoryBar, VictoryPie } from 'victory'
 
 // Import extracted components and types
-import { Role, RoleConfig } from './types'
+import type { Role, RoleConfig } from './types/index'
 import { roles } from './data/mockData'
 import { DataScientistDashboard } from './components/dashboard/DataScientistDashboard'
 

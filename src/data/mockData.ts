@@ -6,7 +6,7 @@ import {
   CodeIcon,
 } from '@patternfly/react-icons'
 
-import {
+import type {
   RoleConfig,
   Fleet,
   ModelMonitoringInfo,
@@ -17,7 +17,7 @@ import {
   Dataset,
   PerformanceMetrics,
   Role
-} from '../types'
+} from '../types/index'
 
 export const roles: RoleConfig[] = [
   {
