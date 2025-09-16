@@ -1432,6 +1432,27 @@ const App: React.FC = () => {
   const [selectedEvaluationType, setSelectedEvaluationType] = React.useState<'accuracy' | 'bias' | 'fairness' | 'performance' | 'robustness'>('accuracy')
   const [selectedEvaluationDetail, setSelectedEvaluationDetail] = React.useState<ModelEvaluation | null>(null)
   const [showEvaluationDetail, setShowEvaluationDetail] = React.useState(false)
+
+  // Create Model Modal State
+  const [isCreateModelModalOpen, setIsCreateModelModalOpen] = React.useState(false)
+  const [newModelName, setNewModelName] = React.useState<string>('')
+  const [newModelDescription, setNewModelDescription] = React.useState<string>('')
+  const [newModelType, setNewModelType] = React.useState<string>('text-classification')
+  const [newModelFramework, setNewModelFramework] = React.useState<string>('pytorch')
+  const [newModelArchitecture, setNewModelArchitecture] = React.useState<string>('dense')
+  const [newModelSize, setNewModelSize] = React.useState<string>('medium')
+  const [newModelDataset, setNewModelDataset] = React.useState<string>('')
+
+  // Import Model Modal State
+  const [isImportModelModalOpen, setIsImportModelModalOpen] = React.useState(false)
+  const [importModelName, setImportModelName] = React.useState<string>('')
+  const [importModelDescription, setImportModelDescription] = React.useState<string>('')
+  const [importSource, setImportSource] = React.useState<string>('huggingface')
+  const [importModelId, setImportModelId] = React.useState<string>('')
+  const [importModelVersion, setImportModelVersion] = React.useState<string>('')
+  const [importNamespace, setImportNamespace] = React.useState<string>('')
+  const [importAuthToken, setImportAuthToken] = React.useState<string>('')
+  const [importRegistry, setImportRegistry] = React.useState<string>('')
   
   const currentRole = roles.find(role => role.id === selectedRole)!
   
@@ -1544,6 +1565,97 @@ const App: React.FC = () => {
     setSelectedEvaluationType('accuracy')
   }
 
+  // Create Model Modal Handlers
+  const handleOpenCreateModelModal = () => {
+    setNewModelName('')
+    setNewModelDescription('')
+    setNewModelType('text-classification')
+    setNewModelFramework('pytorch')
+    setNewModelArchitecture('dense')
+    setNewModelSize('medium')
+    setNewModelDataset('')
+    setIsCreateModelModalOpen(true)
+  }
+
+  const handleCloseCreateModelModal = () => {
+    setIsCreateModelModalOpen(false)
+    setNewModelName('')
+    setNewModelDescription('')
+    setNewModelType('text-classification')
+    setNewModelFramework('pytorch')
+    setNewModelArchitecture('dense')
+    setNewModelSize('medium')
+    setNewModelDataset('')
+  }
+
+  const handleCreateModelSubmit = () => {
+    if (newModelName.trim()) {
+      // In a real app, this would make an API call to create the model
+      console.log('Creating model:', {
+        name: newModelName.trim(),
+        description: newModelDescription.trim(),
+        type: newModelType,
+        framework: newModelFramework,
+        architecture: newModelArchitecture,
+        size: newModelSize,
+        dataset: newModelDataset
+      })
+
+      // Close modal and reset state
+      handleCloseCreateModelModal()
+      
+      // Show success message or navigate to model details
+      // For now, we'll just close the modal
+    }
+  }
+
+  // Import Model Modal Handlers
+  const handleOpenImportModelModal = () => {
+    setImportModelName('')
+    setImportModelDescription('')
+    setImportSource('huggingface')
+    setImportModelId('')
+    setImportModelVersion('')
+    setImportNamespace('')
+    setImportAuthToken('')
+    setImportRegistry('')
+    setIsImportModelModalOpen(true)
+  }
+
+  const handleCloseImportModelModal = () => {
+    setIsImportModelModalOpen(false)
+    setImportModelName('')
+    setImportModelDescription('')
+    setImportSource('huggingface')
+    setImportModelId('')
+    setImportModelVersion('')
+    setImportNamespace('')
+    setImportAuthToken('')
+    setImportRegistry('')
+  }
+
+  const handleImportModelSubmit = () => {
+    if (importModelName.trim() && importModelId.trim()) {
+      // In a real app, this would make an API call to import the model
+      console.log('Importing model:', {
+        name: importModelName.trim(),
+        description: importModelDescription.trim(),
+        source: importSource,
+        modelId: importModelId.trim(),
+        version: importModelVersion.trim() || 'latest',
+        namespace: importNamespace.trim(),
+        authToken: importAuthToken.trim(),
+        registry: importRegistry.trim()
+      })
+
+      // Close modal and reset state
+      handleCloseImportModelModal()
+      
+      // Show success message or navigate to model details
+      // For now, we'll just close the modal
+    }
+  }
+
   const handleStartEvaluation = () => {
     if (!selectedEvaluationModel || !selectedEvaluationDataset) {
       return
@@ -1608,6 +1720,7 @@ const App: React.FC = () => {
       'data-scientist': {
         title: 'Data Science',
         items: [
+          { id: 'models', label: 'Models', icon: <CubeIcon /> },
           { id: 'datasets', label: 'Datasets', icon: <DatabaseIcon /> }
         ]
       },
@@ -1766,38 +1879,337 @@ const App: React.FC = () => {
     const dashboards = {
       'data-scientist': (
         <PageSection>
-          <Gallery hasGutter>
+          {/* Welcome Section */}
+          <div style={{ marginBottom: '24px' }}>
+            <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+              Welcome back, Data Scientist! 👩‍🔬
+            </Title>
+            <p style={{ color: 'var(--pf-v6-global--Color--200)', fontSize: '16px' }}>
+              Here's your ML development overview for today
+            </p>
+          </div>
+
+          {/* Quick Stats Row */}
+          <Gallery hasGutter minWidths={{ default: '250px' }} style={{ marginBottom: '24px' }}>
             <GalleryItem>
-              <Card>
-                <CardTitle>Active Experiments</CardTitle>
-                <CardBody>
-                  <p>Running experiments: <strong>7</strong></p>
-                  <p>Completed this week: <strong>23</strong></p>
-                  <Button variant="primary" size="sm">View Experiments</Button>
+              <Card style={{ height: '120px' }}>
+                <CardBody style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--pf-v6-global--palette--blue--600)' }}>7</div>
+                    <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>Active Experiments</div>
+                    <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--palette--green--600)', marginTop: '4px' }}>
+                      ↑ 23 completed this week
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '32px' }}>🧪</div>
                 </CardBody>
               </Card>
             </GalleryItem>
             <GalleryItem>
-              <Card>
-                <CardTitle>Training Jobs</CardTitle>
-                <CardBody>
-                  <p>Active training: <strong>3</strong></p>
-                  <p>Queued jobs: <strong>5</strong></p>
-                  <Button variant="secondary" size="sm">Manage Jobs</Button>
+              <Card style={{ height: '120px' }}>
+                <CardBody style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--pf-v6-global--palette--purple--600)' }}>3</div>
+                    <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>Training Jobs</div>
+                    <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--palette--orange--600)', marginTop: '4px' }}>
+                      5 queued • 2h avg runtime
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '32px' }}>🏃‍♀️</div>
                 </CardBody>
               </Card>
             </GalleryItem>
             <GalleryItem>
-              <Card>
-                <CardTitle>Datasets</CardTitle>
-                <CardBody>
-                  <p>Available datasets: <strong>15</strong></p>
-                  <p>Total storage: <strong>2.3TB</strong></p>
-                  <Button variant="tertiary" size="sm">Browse</Button>
+              <Card style={{ height: '120px' }}>
+                <CardBody style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--pf-v6-global--palette--green--600)' }}>94.2%</div>
+                    <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>Best Model Accuracy</div>
+                    <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--palette--green--600)', marginTop: '4px' }}>
+                      ↑ +1.3% from last week
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '32px' }}>🎯</div>
+                </CardBody>
+              </Card>
+            </GalleryItem>
+            <GalleryItem>
+              <Card style={{ height: '120px' }}>
+                <CardBody style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div>
+                    <div style={{ fontSize: '28px', fontWeight: 'bold', color: 'var(--pf-v6-global--palette--cyan--600)' }}>2.3TB</div>
+                    <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>Dataset Storage</div>
+                    <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--palette--blue--600)', marginTop: '4px' }}>
+                      15 datasets available
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '32px' }}>💾</div>
                 </CardBody>
               </Card>
             </GalleryItem>
           </Gallery>
+
+          {/* Main Content Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '24px' }}>
+            {/* Training Performance Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Training Performance Trends</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <VictoryChart
+                    theme={{ axis: { style: { tickLabels: { fontSize: 12, fill: '#666' } } } }}
+                    width={500}
+                    height={280}
+                    padding={{ left: 60, top: 20, right: 60, bottom: 50 }}
+                  >
+                    <VictoryAxis dependentAxis tickFormat={(t) => `${t}%`} />
+                    <VictoryAxis tickFormat={() => ''} />
+                    <VictoryLine
+                      data={[
+                        { x: 1, y: 76 }, { x: 2, y: 82 }, { x: 3, y: 87 }, { x: 4, y: 89 }, 
+                        { x: 5, y: 91 }, { x: 6, y: 92 }, { x: 7, y: 94.2 }
+                      ]}
+                      style={{ data: { stroke: '#06c', strokeWidth: 3 } }}
+                    />
+                    <VictoryArea
+                      data={[
+                        { x: 1, y: 76 }, { x: 2, y: 82 }, { x: 3, y: 87 }, { x: 4, y: 89 }, 
+                        { x: 5, y: 91 }, { x: 6, y: 92 }, { x: 7, y: 94.2 }
+                      ]}
+                      style={{ data: { fill: '#06c', fillOpacity: 0.1 } }}
+                    />
+                  </VictoryChart>
+                </div>
+                <div style={{ textAlign: 'center', color: 'var(--pf-v6-global--Color--200)', fontSize: '12px' }}>
+                  Model accuracy improvement over the last 7 experiments
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* Quick Actions & Status */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Resource Utilization */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Resource Usage</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '14px' }}>GPU Cluster</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold' }}>73%</span>
+                    </div>
+                    <div style={{ 
+                      height: '8px', 
+                      backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
+                      borderRadius: '4px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: '73%',
+                        height: '100%',
+                        backgroundColor: 'var(--pf-v6-global--palette--orange--500)'
+                      }} />
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '14px' }}>Storage</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold' }}>45%</span>
+                    </div>
+                    <div style={{ 
+                      height: '8px', 
+                      backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
+                      borderRadius: '4px',
+                      overflow: 'hidden'
+                    }}>
+                      <div style={{
+                        width: '45%',
+                        height: '100%',
+                        backgroundColor: 'var(--pf-v6-global--palette--green--500)'
+                      }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontSize: '14px' }}>Compute Credits</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold' }}>1,247</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                      $3,741 remaining this month
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardBody>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <Button variant="primary" size="sm" onClick={() => setActiveItem('models')}>
+                      🚀 Create New Model
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={() => setActiveItem('datasets')}>
+                      📊 Browse Datasets
+                    </Button>
+                    <Button variant="tertiary" size="sm">
+                      📈 View Experiment Logs
+                    </Button>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+          </div>
+
+          {/* Recent Activities & Insights Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+            {/* Recent Activities */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activities</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {[
+                    { icon: '🎯', action: 'Model "Sentiment Classifier v2.1.3" achieved 94.2% accuracy', time: '2 hours ago', type: 'success' },
+                    { icon: '🏃‍♀️', action: 'Started training "Image Classifier" on Medical Dataset', time: '4 hours ago', type: 'info' },
+                    { icon: '📊', action: 'Uploaded "Customer Reviews Dataset v3" (2.1GB)', time: '6 hours ago', type: 'info' },
+                    { icon: '⚠️', action: 'Training job "Text Generator" failed - out of memory', time: '8 hours ago', type: 'warning' },
+                    { icon: '✅', action: 'Completed evaluation on "Fraud Detection Model"', time: '1 day ago', type: 'success' }
+                  ].map((activity, index) => (
+                    <div key={index} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      padding: '8px', 
+                      borderLeft: `3px solid ${
+                        activity.type === 'success' ? 'var(--pf-v6-global--palette--green--500)' :
+                        activity.type === 'warning' ? 'var(--pf-v6-global--palette--orange--500)' :
+                        'var(--pf-v6-global--palette--blue--500)'
+                      }`,
+                      backgroundColor: 'var(--pf-v6-global--BackgroundColor--100)'
+                    }}>
+                      <div style={{ fontSize: '16px', marginRight: '12px' }}>{activity.icon}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '14px', fontWeight: '500' }}>{activity.action}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>{activity.time}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+
+            {/* AI Insights & Recommendations */}
+            <Card>
+              <CardHeader>
+                <CardTitle>💡 AI Insights & Recommendations</CardTitle>
+              </CardHeader>
+              <CardBody>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <Alert variant="info" title="Performance Optimization" style={{ marginBottom: '12px' }}>
+                    Your "Sentiment Classifier" could benefit from data augmentation. Consider adding 20% more diverse samples to improve generalization.
+                  </Alert>
+                  
+                  <div style={{ padding: '12px', backgroundColor: 'var(--pf-v6-global--BackgroundColor--100)', borderRadius: '8px' }}>
+                    <div style={{ fontWeight: '600', marginBottom: '8px', color: 'var(--pf-v6-global--palette--green--600)' }}>
+                      🚀 Trending Models in Your Domain
+                    </div>
+                    <div style={{ fontSize: '14px', marginBottom: '4px' }}>• BERT-large-uncased (NLP)</div>
+                    <div style={{ fontSize: '14px', marginBottom: '4px' }}>• ResNet-50 (Computer Vision)</div>
+                    <div style={{ fontSize: '14px' }}>• XGBoost (Tabular Data)</div>
+                  </div>
+
+                  <div style={{ padding: '12px', backgroundColor: 'var(--pf-v6-global--BackgroundColor--100)', borderRadius: '8px' }}>
+                    <div style={{ fontWeight: '600', marginBottom: '8px', color: 'var(--pf-v6-global--palette--purple--600)' }}>
+                      📈 Data Quality Insights
+                    </div>
+                    <div style={{ fontSize: '14px', marginBottom: '4px' }}>• 2 datasets need attention</div>
+                    <div style={{ fontSize: '14px', marginBottom: '4px' }}>• Overall quality score: 94.2%</div>
+                    <div style={{ fontSize: '14px' }}>• Recommend cleaning "User Logs v2"</div>
+                  </div>
+
+                  <Button variant="link" size="sm" style={{ alignSelf: 'flex-start', padding: 0 }}>
+                    View detailed recommendations →
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
+          {/* Model Performance Distribution */}
+          <Card style={{ marginBottom: '24px' }}>
+            <CardHeader>
+              <CardTitle>Model Performance Distribution</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ flex: 1 }}>
+                  <VictoryPie
+                    data={[
+                      { x: "Production Ready (>90%)", y: 8, label: "8 models" },
+                      { x: "Good (80-90%)", y: 12, label: "12 models" },
+                      { x: "Needs Improvement (<80%)", y: 5, label: "5 models" }
+                    ]}
+                    width={300}
+                    height={200}
+                    colorScale={["#3e8635", "#f0ab00", "#c9190b"]}
+                    labelRadius={({ innerRadius }) => innerRadius + 30}
+                    style={{ labels: { fontSize: 11, fill: "#333" } }}
+                  />
+                </div>
+                <div style={{ flex: 1, paddingLeft: '24px' }}>
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ width: '12px', height: '12px', backgroundColor: '#3e8635', marginRight: '8px', borderRadius: '2px' }}></div>
+                      <span style={{ fontSize: '14px' }}>Production Ready (>90%): <strong>8 models</strong></span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ width: '12px', height: '12px', backgroundColor: '#f0ab00', marginRight: '8px', borderRadius: '2px' }}></div>
+                      <span style={{ fontSize: '14px' }}>Good Performance (80-90%): <strong>12 models</strong></span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+                      <div style={{ width: '12px', height: '12px', backgroundColor: '#c9190b', marginRight: '8px', borderRadius: '2px' }}></div>
+                      <span style={{ fontSize: '14px' }}>Needs Improvement (<80%): <strong>5 models</strong></span>
+                    </div>
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--pf-v6-global--Color--200)' }}>
+                    <p><strong>Recommendation:</strong> Focus on improving the 5 underperforming models. Consider feature engineering, hyperparameter tuning, or more training data.</p>
+                  </div>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Upcoming Schedule */}
+          <Card>
+            <CardHeader>
+              <CardTitle>📅 Scheduled Activities</CardTitle>
+            </CardHeader>
+            <CardBody>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+                <div style={{ padding: '12px', border: '1px solid var(--pf-v6-global--BorderColor--100)', borderRadius: '8px' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--pf-v6-global--palette--blue--600)', marginBottom: '4px' }}>Today, 3:00 PM</div>
+                  <div style={{ fontSize: '14px', marginBottom: '2px' }}>Model Review Meeting</div>
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>Review Sentiment Classifier v2.1.3 results</div>
+                </div>
+                <div style={{ padding: '12px', border: '1px solid var(--pf-v6-global--BorderColor--100)', borderRadius: '8px' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--pf-v6-global--palette--green--600)', marginBottom: '4px' }}>Tomorrow, 10:00 AM</div>
+                  <div style={{ fontSize: '14px', marginBottom: '2px' }}>Dataset Quality Audit</div>
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>Monthly data quality assessment</div>
+                </div>
+                <div style={{ padding: '12px', border: '1px solid var(--pf-v6-global--BorderColor--100)', borderRadius: '8px' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--pf-v6-global--palette--purple--600)', marginBottom: '4px' }}>Friday, 2:00 PM</div>
+                  <div style={{ fontSize: '14px', marginBottom: '2px' }}>ML Pipeline Demo</div>
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)' }}>Showcase new automated training pipeline</div>
+                </div>
+              </div>
+            </CardBody>
+          </Card>
         </PageSection>
       ),
       'ai-engineer': (
@@ -2374,6 +2786,398 @@ const App: React.FC = () => {
                 </GalleryItem>
               ))}
             </Gallery>
+          </PageSection>
+        ),
+        'models': (
+          <PageSection>
+            <div style={{ marginBottom: '24px' }}>
+              <Title headingLevel="h1" size="2xl" style={{ marginBottom: '8px' }}>
+                Model Development Hub
+              </Title>
+              <p style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                Create, import, and finetune machine learning models. Experiment with different architectures and train models using available datasets.
+              </p>
+            </div>
+            
+            {/* Quick Actions */}
+            <div style={{ marginBottom: '32px' }}>
+              <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>
+                Quick Actions
+              </Title>
+              <Gallery hasGutter minWidths={{ default: '300px' }}>
+                <GalleryItem>
+                  <Card 
+                    style={{ height: '180px', cursor: 'pointer' }} 
+                    isSelectableRaised 
+                    onClick={handleOpenCreateModelModal}
+                  >
+                    <CardBody style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                      <div style={{ fontSize: '32px', marginBottom: '12px', color: 'var(--pf-v6-global--palette--blue--600)' }}>
+                        <CubeIcon />
+                      </div>
+                      <Title headingLevel="h4" size="md" style={{ marginBottom: '8px' }}>
+                        Create New Model
+                      </Title>
+                      <p style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                        Start building a model from scratch with our templates
+                      </p>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+                <GalleryItem>
+                  <Card 
+                    style={{ height: '180px', cursor: 'pointer' }} 
+                    isSelectableRaised 
+                    onClick={handleOpenImportModelModal}
+                  >
+                    <CardBody style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                      <div style={{ fontSize: '32px', marginBottom: '12px', color: 'var(--pf-v6-global--palette--green--600)' }}>
+                        <CloudIcon />
+                      </div>
+                      <Title headingLevel="h4" size="md" style={{ marginBottom: '8px' }}>
+                        Import Model
+                      </Title>
+                      <p style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                        Import existing models from files or repositories
+                      </p>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+                <GalleryItem>
+                  <Card style={{ height: '180px', cursor: 'pointer' }} isSelectableRaised>
+                    <CardBody style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                      <div style={{ fontSize: '32px', marginBottom: '12px', color: 'var(--pf-v6-global--palette--purple--600)' }}>
+                        <FlaskIcon />
+                      </div>
+                      <Title headingLevel="h4" size="md" style={{ marginBottom: '8px' }}>
+                        Finetune Model
+                      </Title>
+                      <p style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                        Finetune existing models with your datasets
+                      </p>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+              </Gallery>
+            </div>
+
+            {/* My Models */}
+            <div style={{ marginBottom: '32px' }}>
+              <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>
+                My Models
+              </Title>
+              <Gallery hasGutter minWidths={{ default: '350px' }}>
+                {mockModelFamilies.map((model) => (
+                  <GalleryItem key={model.id}>
+                    <Card style={{ height: '100%' }}>
+                      <CardHeader>
+                        <Split hasGutter>
+                          <SplitItem isFilled>
+                            <Title headingLevel="h3" size="md">
+                              {model.name}
+                            </Title>
+                          </SplitItem>
+                          <SplitItem>
+                            <Label 
+                              color={
+                                model.type === 'Text Classification' ? 'blue' :
+                                model.type === 'Computer Vision' ? 'green' :
+                                model.type === 'Time Series' ? 'purple' : 'orange'
+                              }
+                            >
+                              {model.type}
+                            </Label>
+                          </SplitItem>
+                        </Split>
+                        <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                          {model.framework} • {model.currentVersion} • {model.developedBy}
+                        </div>
+                      </CardHeader>
+                      <CardBody>
+                        <p style={{ fontSize: '14px', marginBottom: '16px', color: 'var(--pf-v6-global--Color--200)' }}>
+                          {model.description}
+                        </p>
+                        
+                        {/* Latest Version Info */}
+                        {model.versions[0] && (
+                          <div style={{ marginBottom: '16px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                              <div>
+                                <strong>Accuracy:</strong><br />
+                                <span style={{ color: 'var(--pf-v6-global--palette--green--600)' }}>{model.versions[0].accuracy}</span>
+                              </div>
+                              <div>
+                                <strong>Model Size:</strong><br />
+                                <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{model.versions[0].modelSize}</span>
+                              </div>
+                              <div>
+                                <strong>Status:</strong><br />
+                                <Label size="sm" color={
+                                  model.versions[0].status === 'ready' ? 'green' :
+                                  model.versions[0].status === 'training' ? 'blue' :
+                                  model.versions[0].status === 'published' ? 'purple' : 'orange'
+                                }>
+                                  {model.versions[0].status}
+                                </Label>
+                              </div>
+                              <div>
+                                <strong>Training Data:</strong><br />
+                                <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>{model.versions[0].trainingDataset}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Performance Metrics */}
+                        {model.versions[0]?.evaluations && (
+                          <div style={{ marginBottom: '16px' }}>
+                            <div style={{ fontSize: '13px', fontWeight: '600', marginBottom: '8px' }}>Performance Metrics</div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: '12px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Precision:</span>
+                                <span style={{ color: 'var(--pf-v6-global--palette--green--600)' }}>
+                                  {model.versions[0].evaluations.precision}%
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Recall:</span>
+                                <span style={{ color: 'var(--pf-v6-global--palette--green--600)' }}>
+                                  {model.versions[0].evaluations.recall}%
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>F1 Score:</span>
+                                <span style={{ color: 'var(--pf-v6-global--palette--green--600)' }}>
+                                  {model.versions[0].evaluations.f1Score}%
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <span>Latency:</span>
+                                <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>
+                                  {model.versions[0].evaluations.latency}ms
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Action Buttons */}
+                        <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                          <FlexItem>
+                            <Button variant="primary" size="sm">
+                              <PlayIcon style={{ marginRight: '4px' }} />
+                              Train New Version
+                            </Button>
+                          </FlexItem>
+                          <FlexItem>
+                            <Button variant="secondary" size="sm">
+                              View Details
+                            </Button>
+                          </FlexItem>
+                          <FlexItem>
+                            <Button variant="link" size="sm">
+                              Export Model
+                            </Button>
+                          </FlexItem>
+                        </Flex>
+                      </CardBody>
+                    </Card>
+                  </GalleryItem>
+                ))}
+              </Gallery>
+            </div>
+
+            {/* Training Jobs */}
+            <div style={{ marginBottom: '32px' }}>
+              <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>
+                Active Training Jobs
+              </Title>
+              <Gallery hasGutter minWidths={{ default: '300px' }}>
+                <GalleryItem>
+                  <Card>
+                    <CardHeader>
+                      <Title headingLevel="h4" size="md">Sentiment Classifier v2.2.0</Title>
+                      <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                        Training on Customer Reviews Dataset v3
+                      </div>
+                    </CardHeader>
+                    <CardBody>
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '14px' }}>Progress:</span>
+                          <span style={{ fontSize: '14px', fontWeight: '600' }}>73%</span>
+                        </div>
+                        <div style={{ 
+                          height: '8px', 
+                          backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
+                          borderRadius: '4px',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{
+                            width: '73%',
+                            height: '100%',
+                            backgroundColor: 'var(--pf-v6-global--palette--blue--600)',
+                            transition: 'width 0.3s ease'
+                          }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px', marginBottom: '16px' }}>
+                        <div>
+                          <strong>Epoch:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>15/20</span>
+                        </div>
+                        <div>
+                          <strong>Current Loss:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--palette--orange--600)' }}>0.0847</span>
+                        </div>
+                        <div>
+                          <strong>ETA:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>2h 15m</span>
+                        </div>
+                        <div>
+                          <strong>GPU Usage:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--palette--green--600)' }}>89%</span>
+                        </div>
+                      </div>
+                      <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                        <FlexItem>
+                          <Button variant="secondary" size="sm">
+                            View Logs
+                          </Button>
+                        </FlexItem>
+                        <FlexItem>
+                          <Button variant="danger" size="sm">
+                            Stop Training
+                          </Button>
+                        </FlexItem>
+                      </Flex>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+                <GalleryItem>
+                  <Card>
+                    <CardHeader>
+                      <Title headingLevel="h4" size="md">Image Classifier Fine-tuning</Title>
+                      <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                        Fine-tuning on Medical Images Dataset
+                      </div>
+                    </CardHeader>
+                    <CardBody>
+                      <div style={{ marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '14px' }}>Progress:</span>
+                          <span style={{ fontSize: '14px', fontWeight: '600' }}>45%</span>
+                        </div>
+                        <div style={{ 
+                          height: '8px', 
+                          backgroundColor: 'var(--pf-v6-global--BackgroundColor--200)', 
+                          borderRadius: '4px',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{
+                            width: '45%',
+                            height: '100%',
+                            backgroundColor: 'var(--pf-v6-global--palette--purple--600)',
+                            transition: 'width 0.3s ease'
+                          }} />
+                        </div>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px', marginBottom: '16px' }}>
+                        <div>
+                          <strong>Epoch:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>9/20</span>
+                        </div>
+                        <div>
+                          <strong>Current Accuracy:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--palette--green--600)' }}>87.3%</span>
+                        </div>
+                        <div>
+                          <strong>ETA:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--Color--200)' }}>4h 32m</span>
+                        </div>
+                        <div>
+                          <strong>GPU Usage:</strong><br />
+                          <span style={{ color: 'var(--pf-v6-global--palette--green--600)' }}>92%</span>
+                        </div>
+                      </div>
+                      <Flex spaceItems={{ default: 'spaceItemsSm' }}>
+                        <FlexItem>
+                          <Button variant="secondary" size="sm">
+                            View Metrics
+                          </Button>
+                        </FlexItem>
+                        <FlexItem>
+                          <Button variant="danger" size="sm">
+                            Stop Training
+                          </Button>
+                        </FlexItem>
+                      </Flex>
+                    </CardBody>
+                  </Card>
+                </GalleryItem>
+              </Gallery>
+            </div>
+
+            {/* Available Datasets for Training */}
+            <div>
+              <Title headingLevel="h2" size="lg" style={{ marginBottom: '16px' }}>
+                Available Training Datasets
+              </Title>
+              <p style={{ color: 'var(--pf-v6-global--Color--200)', marginBottom: '16px', fontSize: '14px' }}>
+                Select datasets to train new models or finetune existing ones.
+              </p>
+              <Gallery hasGutter minWidths={{ default: '280px' }}>
+                {mockDatasets.slice(0, 4).map((dataset) => (
+                  <GalleryItem key={dataset.id}>
+                    <Card style={{ height: '220px' }}>
+                      <CardHeader>
+                        <Title headingLevel="h4" size="sm">
+                          {dataset.name}
+                        </Title>
+                        <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                          {dataset.format} • {dataset.size} • {dataset.recordCount.toLocaleString()} records
+                        </div>
+                      </CardHeader>
+                      <CardBody>
+                        <p style={{ fontSize: '12px', marginBottom: '12px', color: 'var(--pf-v6-global--Color--200)' }}>
+                          {dataset.description.substring(0, 80)}...
+                        </p>
+                        <div style={{ marginBottom: '12px', fontSize: '11px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span>Quality Score:</span>
+                            <span style={{ 
+                              color: dataset.quality.completeness >= 95 ? 'var(--pf-v6-global--palette--green--600)' : 
+                                     'var(--pf-v6-global--palette--orange--600)'
+                            }}>
+                              {Math.round((dataset.quality.completeness + dataset.quality.validity + dataset.quality.consistency) / 3)}%
+                            </span>
+                          </div>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px' }}>
+                            {dataset.tags.slice(0, 2).map(tag => (
+                              <Label key={tag} size="sm" color="grey">
+                                {tag}
+                              </Label>
+                            ))}
+                          </div>
+                        </div>
+                        <Flex spaceItems={{ default: 'spaceItemsXs' }}>
+                          <FlexItem>
+                            <Button variant="primary" size="sm">
+                              Use for Training
+                            </Button>
+                          </FlexItem>
+                          <FlexItem>
+                            <Button variant="link" size="sm">
+                              Preview
+                            </Button>
+                          </FlexItem>
+                        </Flex>
+                      </CardBody>
+                    </Card>
+                  </GalleryItem>
+                ))}
+              </Gallery>
+            </div>
           </PageSection>
         )
       },
@@ -4142,6 +4946,368 @@ const App: React.FC = () => {
             </Form>
           </div>
         )}
+      </Modal>
+
+      {/* Create Model Modal */}
+      <Modal
+        variant={ModalVariant.large}
+        title="Create New Model"
+        isOpen={isCreateModelModalOpen}
+        onClose={handleCloseCreateModelModal}
+      >
+        <div style={{ padding: '24px' }}>
+          <Form>
+            {/* Basic Information */}
+            <FormGroup label="Model Name" fieldId="model-name" isRequired style={{ marginBottom: '16px' }}>
+              <TextInput
+                id="model-name"
+                value={newModelName}
+                onChange={(_event, value) => setNewModelName(value)}
+                placeholder="Enter model name (e.g., Customer Sentiment Classifier)"
+              />
+            </FormGroup>
+
+            <FormGroup label="Description" fieldId="model-description" style={{ marginBottom: '16px' }}>
+              <TextInput
+                id="model-description"
+                value={newModelDescription}
+                onChange={(_event, value) => setNewModelDescription(value)}
+                placeholder="Brief description of what this model does"
+              />
+            </FormGroup>
+
+            {/* Model Configuration */}
+            <FormGroup label="Model Type" fieldId="model-type" isRequired style={{ marginBottom: '16px' }}>
+              <FormSelect
+                id="model-type"
+                value={newModelType}
+                onChange={(_event, value) => setNewModelType(value)}
+              >
+                <FormSelectOption value="text-classification" label="Text Classification" />
+                <FormSelectOption value="computer-vision" label="Computer Vision" />
+                <FormSelectOption value="time-series" label="Time Series" />
+                <FormSelectOption value="recommendation" label="Recommendation System" />
+                <FormSelectOption value="anomaly-detection" label="Anomaly Detection" />
+                <FormSelectOption value="regression" label="Regression" />
+                <FormSelectOption value="clustering" label="Clustering" />
+                <FormSelectOption value="reinforcement-learning" label="Reinforcement Learning" />
+              </FormSelect>
+            </FormGroup>
+
+            <FormGroup label="Framework" fieldId="model-framework" isRequired style={{ marginBottom: '16px' }}>
+              <FormSelect
+                id="model-framework"
+                value={newModelFramework}
+                onChange={(_event, value) => setNewModelFramework(value)}
+              >
+                <FormSelectOption value="pytorch" label="PyTorch" />
+                <FormSelectOption value="tensorflow" label="TensorFlow" />
+                <FormSelectOption value="scikit-learn" label="Scikit-learn" />
+                <FormSelectOption value="huggingface" label="Hugging Face Transformers" />
+                <FormSelectOption value="keras" label="Keras" />
+                <FormSelectOption value="xgboost" label="XGBoost" />
+                <FormSelectOption value="lightgbm" label="LightGBM" />
+                <FormSelectOption value="jax" label="JAX" />
+              </FormSelect>
+            </FormGroup>
+
+            <FormGroup label="Model Architecture" fieldId="model-architecture" isRequired style={{ marginBottom: '16px' }}>
+              <FormSelect
+                id="model-architecture"
+                value={newModelArchitecture}
+                onChange={(_event, value) => setNewModelArchitecture(value)}
+              >
+                <FormSelectOption value="dense" label="Dense Neural Network" />
+                <FormSelectOption value="moe" label="Mixture of Experts (MoE)" />
+                <FormSelectOption value="transformer" label="Transformer" />
+                <FormSelectOption value="cnn" label="Convolutional Neural Network (CNN)" />
+                <FormSelectOption value="rnn" label="Recurrent Neural Network (RNN)" />
+                <FormSelectOption value="lstm" label="Long Short-Term Memory (LSTM)" />
+                <FormSelectOption value="gru" label="Gated Recurrent Unit (GRU)" />
+                <FormSelectOption value="autoencoder" label="Autoencoder" />
+                <FormSelectOption value="gan" label="Generative Adversarial Network (GAN)" />
+                <FormSelectOption value="vae" label="Variational Autoencoder (VAE)" />
+                <FormSelectOption value="resnet" label="ResNet" />
+                <FormSelectOption value="efficientnet" label="EfficientNet" />
+                <FormSelectOption value="bert" label="BERT" />
+                <FormSelectOption value="gpt" label="GPT" />
+              </FormSelect>
+            </FormGroup>
+
+            <FormGroup label="Model Size (Parameters)" fieldId="model-size" isRequired style={{ marginBottom: '16px' }}>
+              <FormSelect
+                id="model-size"
+                value={newModelSize}
+                onChange={(_event, value) => setNewModelSize(value)}
+              >
+                <FormSelectOption value="nano" label="Nano (< 1M parameters)" />
+                <FormSelectOption value="micro" label="Micro (1M - 10M parameters)" />
+                <FormSelectOption value="small" label="Small (10M - 50M parameters)" />
+                <FormSelectOption value="medium" label="Medium (50M - 200M parameters)" />
+                <FormSelectOption value="large" label="Large (200M - 1B parameters)" />
+                <FormSelectOption value="xlarge" label="X-Large (1B - 10B parameters)" />
+                <FormSelectOption value="xxlarge" label="XX-Large (10B - 100B parameters)" />
+                <FormSelectOption value="ultra" label="Ultra (> 100B parameters)" />
+              </FormSelect>
+            </FormGroup>
+
+            {/* Training Configuration */}
+            <FormGroup label="Training Dataset" fieldId="training-dataset" style={{ marginBottom: '16px' }}>
+              <FormSelect
+                id="training-dataset"
+                value={newModelDataset}
+                onChange={(_event, value) => setNewModelDataset(value)}
+              >
+                <FormSelectOption value="" label="Select a dataset (optional)" />
+                {mockDatasets.map(dataset => (
+                  <FormSelectOption 
+                    key={dataset.id} 
+                    value={dataset.id} 
+                    label={`${dataset.name} (${dataset.format}, ${dataset.size})`} 
+                  />
+                ))}
+              </FormSelect>
+            </FormGroup>
+
+            {/* Additional Configuration Info */}
+            <div style={{ 
+              padding: '16px', 
+              backgroundColor: 'var(--pf-v6-global--BackgroundColor--150)', 
+              borderRadius: '8px',
+              marginBottom: '24px'
+            }}>
+              <Title headingLevel="h4" size="md" style={{ marginBottom: '8px' }}>
+                Configuration Summary
+              </Title>
+              <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                <p><strong>Type:</strong> {newModelType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+                <p><strong>Framework:</strong> {newModelFramework.charAt(0).toUpperCase() + newModelFramework.slice(1)}</p>
+                <p><strong>Architecture:</strong> {newModelArchitecture.toUpperCase()}</p>
+                <p><strong>Size:</strong> {newModelSize.charAt(0).toUpperCase() + newModelSize.slice(1)}</p>
+                {newModelDataset && (
+                  <p><strong>Training Dataset:</strong> {mockDatasets.find(d => d.id === newModelDataset)?.name || 'Selected dataset'}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
+              <Button
+                variant="link"
+                onClick={handleCloseCreateModelModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleCreateModelSubmit}
+                isDisabled={!newModelName.trim()}
+              >
+                Create Model
+              </Button>
+            </div>
+          </Form>
+        </div>
+      </Modal>
+
+      {/* Import Model Modal */}
+      <Modal
+        variant={ModalVariant.large}
+        title="Import Model"
+        isOpen={isImportModelModalOpen}
+        onClose={handleCloseImportModelModal}
+      >
+        <div style={{ padding: '24px' }}>
+          <Form>
+            {/* Basic Information */}
+            <FormGroup label="Model Name" fieldId="import-model-name" isRequired style={{ marginBottom: '16px' }}>
+              <TextInput
+                id="import-model-name"
+                value={importModelName}
+                onChange={(_event, value) => setImportModelName(value)}
+                placeholder="Enter a name for the imported model"
+              />
+            </FormGroup>
+
+            <FormGroup label="Description" fieldId="import-model-description" style={{ marginBottom: '16px' }}>
+              <TextInput
+                id="import-model-description"
+                value={importModelDescription}
+                onChange={(_event, value) => setImportModelDescription(value)}
+                placeholder="Optional description for the imported model"
+              />
+            </FormGroup>
+
+            {/* Import Source */}
+            <FormGroup label="Import Source" fieldId="import-source" isRequired style={{ marginBottom: '16px' }}>
+              <FormSelect
+                id="import-source"
+                value={importSource}
+                onChange={(_event, value) => setImportSource(value)}
+              >
+                <FormSelectOption value="huggingface" label="🤗 Hugging Face Hub" />
+                <FormSelectOption value="oci" label="🐱 OCI Container Registry" />
+              </FormSelect>
+            </FormGroup>
+
+            {/* Conditional fields based on import source */}
+            {importSource === 'huggingface' ? (
+              <>
+                <FormGroup label="Model ID" fieldId="hf-model-id" isRequired style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="hf-model-id"
+                    value={importModelId}
+                    onChange={(_event, value) => setImportModelId(value)}
+                    placeholder="e.g., microsoft/DialoGPT-medium, bert-base-uncased"
+                  />
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                    Format: organization/model-name or model-name for community models
+                  </div>
+                </FormGroup>
+
+                <FormGroup label="Model Version/Revision" fieldId="hf-model-version" style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="hf-model-version"
+                    value={importModelVersion}
+                    onChange={(_event, value) => setImportModelVersion(value)}
+                    placeholder="main (default), v1.0, commit hash, or branch name"
+                  />
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                    Leave empty to use the latest version (main branch)
+                  </div>
+                </FormGroup>
+
+                <FormGroup label="Access Token" fieldId="hf-auth-token" style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="hf-auth-token"
+                    value={importAuthToken}
+                    onChange={(_event, value) => setImportAuthToken(value)}
+                    placeholder="hf_xxxxxxxxxxxxxxxxx (for private models)"
+                    type="password"
+                  />
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                    Required for private models. Get your token from Hugging Face settings.
+                  </div>
+                </FormGroup>
+              </>
+            ) : (
+              <>
+                <FormGroup label="Registry URL" fieldId="oci-registry" isRequired style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="oci-registry"
+                    value={importRegistry}
+                    onChange={(_event, value) => setImportRegistry(value)}
+                    placeholder="e.g., ghcr.io, docker.io, registry.redhat.io"
+                  />
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                    Container registry hostname
+                  </div>
+                </FormGroup>
+
+                <FormGroup label="Namespace/Organization" fieldId="oci-namespace" isRequired style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="oci-namespace"
+                    value={importNamespace}
+                    onChange={(_event, value) => setImportNamespace(value)}
+                    placeholder="e.g., organization, username"
+                  />
+                </FormGroup>
+
+                <FormGroup label="Model Repository" fieldId="oci-model-id" isRequired style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="oci-model-id"
+                    value={importModelId}
+                    onChange={(_event, value) => setImportModelId(value)}
+                    placeholder="e.g., my-model, sentiment-classifier"
+                  />
+                </FormGroup>
+
+                <FormGroup label="Tag/Version" fieldId="oci-model-version" style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="oci-model-version"
+                    value={importModelVersion}
+                    onChange={(_event, value) => setImportModelVersion(value)}
+                    placeholder="latest (default), v1.0, sha256:..."
+                  />
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                    Leave empty to use 'latest' tag
+                  </div>
+                </FormGroup>
+
+                <FormGroup label="Authentication Token" fieldId="oci-auth-token" style={{ marginBottom: '16px' }}>
+                  <TextInput
+                    id="oci-auth-token"
+                    value={importAuthToken}
+                    onChange={(_event, value) => setImportAuthToken(value)}
+                    placeholder="Registry access token or password"
+                    type="password"
+                  />
+                  <div style={{ fontSize: '12px', color: 'var(--pf-v6-global--Color--200)', marginTop: '4px' }}>
+                    Required for private registries. Use personal access tokens when possible.
+                  </div>
+                </FormGroup>
+              </>
+            )}
+
+            {/* Import Configuration Summary */}
+            <div style={{ 
+              padding: '16px', 
+              backgroundColor: 'var(--pf-v6-global--BackgroundColor--150)', 
+              borderRadius: '8px',
+              marginBottom: '24px'
+            }}>
+              <Title headingLevel="h4" size="md" style={{ marginBottom: '8px' }}>
+                Import Summary
+              </Title>
+              <div style={{ fontSize: '14px', color: 'var(--pf-v6-global--Color--200)' }}>
+                <p><strong>Source:</strong> {importSource === 'huggingface' ? '🤗 Hugging Face Hub' : '🐱 OCI Container Registry'}</p>
+                <p><strong>Model Name:</strong> {importModelName || 'Not specified'}</p>
+                {importSource === 'huggingface' ? (
+                  <>
+                    <p><strong>Model ID:</strong> {importModelId || 'Not specified'}</p>
+                    <p><strong>Version:</strong> {importModelVersion || 'main (latest)'}</p>
+                    <p><strong>Authentication:</strong> {importAuthToken ? '🔒 Token provided' : '🔓 Public access'}</p>
+                  </>
+                ) : (
+                  <>
+                    <p><strong>Registry:</strong> {importRegistry || 'Not specified'}</p>
+                    <p><strong>Full Path:</strong> {importRegistry && importNamespace && importModelId ? 
+                      `${importRegistry}/${importNamespace}/${importModelId}:${importModelVersion || 'latest'}` : 
+                      'Incomplete path'
+                    }</p>
+                    <p><strong>Authentication:</strong> {importAuthToken ? '🔒 Token provided' : '🔓 No authentication'}</p>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
+              <Button
+                variant="link"
+                onClick={handleCloseImportModelModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                onClick={handleImportModelSubmit}
+                isDisabled={!importModelName.trim() || !importModelId.trim() || 
+                  (importSource === 'oci' && (!importRegistry.trim() || !importNamespace.trim()))}
+              >
+                Import Model
+              </Button>
+            </div>
+          </Form>
+        </div>
       </Modal>
     </>
   )
