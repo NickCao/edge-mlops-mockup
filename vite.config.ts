@@ -12,5 +12,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split vendor libraries into separate chunks
+          'patternfly': ['@patternfly/react-core', '@patternfly/react-table', '@patternfly/react-icons'],
+          'victory': ['victory'],
+          'react-vendor': ['react', 'react-dom'],
+        },
+      },
+    },
   },
 })
